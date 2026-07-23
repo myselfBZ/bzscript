@@ -208,6 +208,17 @@ func TestInfix(t *testing.T) {
 	}{
 		{input: "1 + 1", expected: &ast.InfixExpression{Operator: "+", Left: &ast.Intiger{Value: 1}, Right: &ast.Intiger{Value: 1}}},
 		{input: "x - y", expected: &ast.InfixExpression{Operator: "-", Left: &ast.Ident{Value: "x"}, Right: &ast.Ident{Value: "y"}}},
+		{input: "x == y", expected: &ast.InfixExpression{Operator: "==", Left: &ast.Ident{Value: "x"}, Right: &ast.Ident{Value: "y"}}},
+		{input: "x <= y", expected: &ast.InfixExpression{Operator: "<=", Left: &ast.Ident{Value: "x"}, Right: &ast.Ident{Value: "y"}}},
+		{input: "x >= y", expected: &ast.InfixExpression{Operator: ">=", Left: &ast.Ident{Value: "x"}, Right: &ast.Ident{Value: "y"}}},
+		{input: "x != y", expected: &ast.InfixExpression{Operator: "!=", Left: &ast.Ident{Value: "x"}, Right: &ast.Ident{Value: "y"}}},
+		{input: "1 + 2 != y", expected: &ast.InfixExpression{Operator: "!=", 
+		Left: &ast.InfixExpression{
+			Operator: "+",
+			Left: &ast.Intiger{Value: 1},
+			Right: &ast.Intiger{Value: 2},
+		}, 
+		Right: &ast.Ident{Value: "y"}}},
 		{
 			input: "1 + 1 * 2",
 			expected: &ast.InfixExpression{Operator: "+", Left: &ast.Intiger{Value: 1}, Right: &ast.InfixExpression{
