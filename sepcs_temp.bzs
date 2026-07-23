@@ -1,0 +1,36 @@
+// variables
+var [ident] = [value];
+const [ident] = [value];
+
+// functions
+fun [ident]() {
+}
+var [ident] = fun () {
+}
+
+// control flow
+if [condition] {}
+else {}
+
+
+// loop
+while [condition] {
+}
+
+
+// types
+Int -> 1, 2, 3...
+String -> "Hello, world", "Boburmirzo"
+Boolean -> true, false 
+Float -> 3.14, 6.01
+
+// composite types
+Struct -> {
+    name: "John",
+    age: 23,
+}
+Array -> [1, 2, 3, 4], ["apples", "bananas"]
+Map -> map{
+    "key":"value",
+    "secondkey":23
+}
