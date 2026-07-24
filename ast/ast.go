@@ -237,7 +237,7 @@ func (f *FunctionLiteral) String() string {
 	buff.WriteString("(")
 	for i, ident := range f.Params {
 		buff.WriteString(ident.String())
-		if i != len(f.Params) - 1 {
+		if i != len(f.Params)-1 {
 			buff.WriteString(", ")
 		}
 	}
@@ -264,7 +264,7 @@ func (f *AnonymousFuncLiteral) String() string {
 	buff.WriteString("(")
 	for i, ident := range f.Params {
 		buff.WriteString(ident.String())
-		if i != len(f.Params) - 1 {
+		if i != len(f.Params)-1 {
 			buff.WriteString(", ")
 		}
 	}
@@ -277,3 +277,26 @@ func (f *AnonymousFuncLiteral) TokenLiteral() string {
 	return f.Token.Literal
 }
 func (f *AnonymousFuncLiteral) expressionNode() {}
+
+type FunctionCall struct {
+	Token    *token.Token
+	Function Expression
+	Args     []Expression
+}
+func (f *FunctionCall) String() string {
+	buff := &bytes.Buffer{}
+	buff.WriteString(f.Function.String())
+	buff.WriteString("(")
+	for i, e := range f.Args {
+		buff.WriteString(e.String())
+		if i != len(f.Args) - 1 {
+			buff.WriteString(", ")
+		}
+	}
+	buff.WriteString(")")
+	return buff.String()
+}
+func (f *FunctionCall) TokenLiteral() string {
+	return f.Token.Literal
+}
+func (f *FunctionCall) expressionNode() {}
