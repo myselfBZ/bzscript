@@ -261,6 +261,68 @@ func TestInfix(t *testing.T) {
 
 }
 
+func TestFunctionLiterals(t *testing.T) {
+	tests := []struct{
+		input string
+		expectedErr error
+	} {
+		{input: "fun x(a) {\n}", expectedErr: nil},
+		{input: "fun x() {\n}", expectedErr: nil},
+		{input: "fun x(a, b, c) {\n}", expectedErr: nil},
+		{input: "fun x(a, b) {\nb + 1\nvar s = \"Hello\"\n}", expectedErr: nil},
+	}
+
+	for _, tt := range tests{
+		p := New(lexer.New(tt.input))
+		program := p.ParseProgram()
+		if len(p.Errors()) > 0 {
+			if tt.expectedErr == nil {
+				t.Log("Unexpected error, input:", tt.input)
+				printErrors(t, p.Errors())
+				t.FailNow()
+			}
+
+			if tt.expectedErr.Error() != p.Errors()[0].Error() {
+				t.Errorf("expected error: '%v', got '%v'", tt.expectedErr, p.Errors()[0])
+			}
+			continue
+		}
+		if program.Statements[0].String() != tt.input {
+			t.Errorf("expected value '%s', got '%s'", tt.input, program.Statements[0].String())
+		}
+	}
+}
+
+func TestAnonymousFunc(t *testing.T) {
+	tests := []struct{
+		input string
+		expectedErr error
+	} {
+		{input: "var myFunction = fun (x, y) {\nx + y\n}", expectedErr: nil},
+		{input: "var newFunction = fun () {\nvar x = \"Hello world\"\n}", expectedErr: nil},
+	}
+
+	for _, tt := range tests {
+		p := New(lexer.New(tt.input))
+		program := p.ParseProgram()
+		if len(p.Errors()) > 0 {
+			if tt.expectedErr == nil {
+				t.Log("Unexpected error, input:", tt.input)
+				printErrors(t, p.Errors())
+				t.FailNow()
+			}
+
+			if tt.expectedErr.Error() != p.Errors()[0].Error() {
+				t.Errorf("expected error: '%v', got '%v'", tt.expectedErr, p.Errors()[0])
+			}
+			continue
+		}
+		if program.Statements[0].String() != tt.input {
+			t.Errorf("expected value '%s', got '%s'", tt.input, program.Statements[0].String())
+		}
+	}
+}
+
 func TestIfStatements(t *testing.T) {
 	tests := []struct{
 		input string // and expected value

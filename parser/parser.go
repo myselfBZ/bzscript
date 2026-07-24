@@ -55,6 +55,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.curToken = p.lexer.NextToken()
 	p.peekTok = p.lexer.NextToken()
 	p.registerPrefixFunc(token.INT, p.parseIntiger)
+	p.registerPrefixFunc(token.FUNCTION, p.parseAnonymousFunc)
 	p.registerPrefixFunc(token.LPAREN, p.parseGroupedExpressions)
 	p.registerPrefixFunc(token.FLOAT, p.parseFloat)
 	p.registerPrefixFunc(token.STRING, p.parseString)
@@ -95,6 +96,8 @@ func (p *Parser) parse() ast.Statement {
 		return p.parseVarStatement()
 	case token.IF:
 		return p.parseIfStatement()
+	case token.FUNCTION:
+		return p.parseFunctionLiteral()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -170,6 +173,74 @@ func (p *Parser) parseIntiger() ast.Expression {
 
 func (p *Parser) parseIdent() ast.Expression {
 	return &ast.Ident{Value: p.curToken.Literal, Token: p.curToken}
+}
+
+func (p *Parser) parseAnonymousFunc() ast.Expression {
+	function := &ast.AnonymousFuncLiteral{Token: p.curToken}
+	if !p.peekTokenIs(token.LPAREN) {
+		p.onError(p.expectedError(token.LPAREN, p.peekTok.Type))
+		return nil
+	}
+	p.next()
+	function.Params = p.parseParams()
+	if !p.peekTokenIs(token.LBRACE) {
+		p.onError(p.expectedError(token.LBRACE, p.peekTok.Type))
+		return nil
+	}
+	p.next()
+	function.Body = p.parseBlock()
+	return function
+}
+
+func (p *Parser) parseFunctionLiteral() ast.Statement {
+	node := &ast.ExpressionStatement{Token: p.curToken}
+	function := &ast.FunctionLiteral{Token: p.curToken}
+	if !p.peekTokenIs(token.IDENT) {
+		p.onError(p.expectedError(token.IDENT, p.peekTok.Type))
+		return nil
+	}
+	p.next()
+	function.Ident = p.parseIdent().(*ast.Ident)
+	if !p.peekTokenIs(token.LPAREN) {
+		p.onError(p.expectedError(token.LPAREN, p.peekTok.Type))
+		return nil
+	}
+	p.next()
+	function.Params = p.parseParams()
+	if !p.peekTokenIs(token.LBRACE) {
+		p.onError(p.expectedError(token.LBRACE, p.peekTok.Type))
+		return nil
+	}
+	p.next()
+	function.Body = p.parseBlock()
+	node.Expression = function
+	return node
+}
+
+func (p *Parser) parseParams() []*ast.Ident {
+	idents := []*ast.Ident{}
+	if p.peekTokenIs(token.RPAREN) {
+		p.next()
+		return idents
+	}
+	p.next()
+	ident1 := &ast.Ident{Token: p.curToken, Value: p.curToken.Literal}
+	idents = append(idents, ident1)
+	for p.peekTokenIs(token.COMMA) {
+		p.next()
+		if !p.peekTokenIs(token.IDENT) {
+			break
+		}
+		p.next()
+		ident := &ast.Ident{Token: p.curToken, Value: p.curToken.Literal}
+		idents = append(idents, ident)
+	}
+	if !p.peekTokenIs(token.RPAREN) {
+		p.onError(p.expectedError(token.RPAREN, p.peekTok.Type))
+		return nil
+	}
+	p.next()
+	return idents
 }
 
 func (p *Parser) parseIfStatement() ast.Statement {
