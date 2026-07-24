@@ -18,6 +18,8 @@ var(
 var(
 	_ Statement = (*VarStatement)(nil)
 	_ Statement = (*ExpressionStatement)(nil)
+	_ Statement = (*Block)(nil)
+	_ Statement = (*IfStatement)(nil)
 )
 
 type Program struct {
@@ -44,7 +46,7 @@ type VarStatement struct {
 	Value Expression
 }
 func (v *VarStatement) String() string {
-	return fmt.Sprintf("%s", v.Value)
+	return fmt.Sprintf("var %s = %s", v.Ident.String(), v.Value.String())
 }
 func (v *VarStatement) TokenLiteral() string {
 	return v.Token.Literal
@@ -166,3 +168,52 @@ func (e *ExpressionStatement) TokenLiteral() string {
 	return e.Token.Literal
 }
 func (e *ExpressionStatement) statementNode() {}
+
+type Block struct {
+	Token *token.Token
+	Statements []Statement
+}
+func (b *Block) String() string {
+	buff := bytes.Buffer{}
+	buff.WriteString("{\n")
+	for _, s := range b.Statements {
+		buff.WriteString(s.String())
+		buff.WriteString("\n")
+	}
+	buff.WriteString("}")
+	return buff.String()
+}
+func (b *Block) TokenLiteral() string {
+	return b.Token.Literal
+}
+func (b *Block) statementNode() {}
+
+type IfStatement struct {
+	Token *token.Token
+	Condition Expression
+	Consequence *Block
+	Alternative *Block
+}
+
+func (i *IfStatement) String() string {
+	buff := bytes.Buffer{}
+	buff.WriteString("if")
+	buff.WriteString(" ")
+	buff.WriteString(i.Condition.String())
+	buff.WriteString(" ")
+	buff.WriteString(i.Consequence.String())
+
+	if i.Alternative != nil {
+		buff.WriteString(" ")
+		buff.WriteString("else")
+		buff.WriteString(" ")
+		buff.WriteString(i.Alternative.String())
+	}
+
+	return buff.String()
+}
+func (i *IfStatement) TokenLiteral() string {
+	return i.Token.Literal
+}
+func(i *IfStatement) statementNode() {} 
+
