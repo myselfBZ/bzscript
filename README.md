@@ -7,10 +7,10 @@ BzScript - a toy programming language designed for beginners to grasp the basics
 ```bzscript
 // variable decleration with different types
 var x = 1234 // intigers
-var pi = 3.14
-var name = "bzscript"
-var isNew = true
-var forProd = false
+var pi = 3.14 // floats
+var name = "bzscript" // strings
+var isNew = true // booleans
+var forProd = false // booleans
 ```
 
 ```bzscript
