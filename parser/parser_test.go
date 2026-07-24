@@ -261,6 +261,38 @@ func TestInfix(t *testing.T) {
 
 }
 
+func TestFunctionCall(t *testing.T) {
+	tests := []struct{
+		input string
+		expectedErr error
+	} {
+		{input: "x(1, 2, 3)", expectedErr: nil},
+		{input: "newFunction()", expectedErr: nil},
+		{input: "newFunction(1, 2)", expectedErr: nil},
+		{input: "newFunction(1, 2", expectedErr: fmt.Errorf("expected token type ), got EOF")},
+	}
+
+	for _, tt := range tests{
+		p := New(lexer.New(tt.input))
+		program := p.ParseProgram()
+		if len(p.Errors()) > 0 {
+			if tt.expectedErr == nil {
+				t.Log("Unexpected error, input:", tt.input)
+				printErrors(t, p.Errors())
+				t.FailNow()
+			}
+
+			if tt.expectedErr.Error() != p.Errors()[0].Error() {
+				t.Errorf("expected error: '%v', got '%v'", tt.expectedErr, p.Errors()[0])
+			}
+			continue
+		}
+		if program.Statements[0].String() != tt.input {
+			t.Errorf("expected value '%s', got '%s'", tt.input, program.Statements[0].String())
+		}
+	}
+}
+
 func TestFunctionLiterals(t *testing.T) {
 	tests := []struct{
 		input string

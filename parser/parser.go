@@ -17,9 +17,11 @@ const (
 	ADD_SUB
 	MULTI_DIV
 	PREFIX
+	CALL
 )
 
 var precedences = map[token.TokenType]Precedence{
+	token.LPAREN: 		  CALL,
 	token.PLUS:           ADD_SUB,
 	token.MINUS:          ADD_SUB,
 	token.MULTIPLICATION: MULTI_DIV,
@@ -68,6 +70,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfixFunc(token.PLUS, p.parseInfixExpr)
 	p.registerInfixFunc(token.MINUS, p.parseInfixExpr)
 	p.registerInfixFunc(token.MULTIPLICATION, p.parseInfixExpr)
+	p.registerInfixFunc(token.LPAREN, p.parseFunctionCall)
 	p.registerInfixFunc(token.DIVISION, p.parseInfixExpr)
 	p.registerInfixFunc(token.EQ, p.parseInfixExpr)
 	p.registerInfixFunc(token.NOT_EQ, p.parseInfixExpr)
@@ -190,6 +193,37 @@ func (p *Parser) parseAnonymousFunc() ast.Expression {
 	p.next()
 	function.Body = p.parseBlock()
 	return function
+}
+
+func (p *Parser) parseFunctionCall(function ast.Expression) ast.Expression {
+	node := &ast.FunctionCall{Token: p.curToken, Function: function}
+	node.Args = p.parseCallArguements()
+	return node
+}
+
+func (p *Parser) parseCallArguements() []ast.Expression {
+	var arguments []ast.Expression
+	if p.peekTokenIs(token.RPAREN) {
+		p.next()
+		return arguments
+	}
+	p.next()
+	arguments = append(arguments, p.parseExpression(LOWEST))
+	for p.peekTokenIs(token.COMMA) {
+		p.next()
+		if p.peekTokenIs(token.RPAREN) {
+			break
+		}
+		p.next()
+		node := p.parseExpression(LOWEST)
+		arguments = append(arguments, node)
+	}
+	if !p.peekTokenIs(token.RPAREN) {
+		p.onError(p.expectedError(token.RPAREN, p.peekTok.Type))
+		return nil
+	}
+	p.next()
+	return arguments
 }
 
 func (p *Parser) parseFunctionLiteral() ast.Statement {
