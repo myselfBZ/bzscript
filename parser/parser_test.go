@@ -21,7 +21,7 @@ func TestParseMalformedExpressionVar(t *testing.T) {
 		t.Error("no parser errors")
 	}
 
-	expectedError := fmt.Errorf("invalid prefix expression token: EOF")
+	expectedError := fmt.Errorf("expected expression, got: EOF")
 	if expectedError.Error() != p.Errors()[0].Error() {
 		t.Errorf("expected error '%s', got '%s'", expectedError.Error(), p.Errors()[0].Error())
 	}
@@ -259,6 +259,45 @@ func TestInfix(t *testing.T) {
 		assertInfixEqual(t, tt.expected, infix)
 	}
 
+}
+
+func TestIfStatements(t *testing.T) {
+	tests := []struct{
+		input string // and expected value
+		expectedErr error
+	}{
+		{input: "if true {\nvar x = 1\n}", expectedErr: nil},
+		{input: "if true {\nvar x = 1\n} else {\nvar x = 2\n}", expectedErr: nil},
+		{input: "if {}", expectedErr: fmt.Errorf("expected expression, got: {")},
+		{input: "if x == 1 }", expectedErr: fmt.Errorf("missing { on if statement block, got: }")},
+		{input: "if x == 1 { var x = 123", expectedErr: fmt.Errorf("missing } at the end of the block")},
+	}
+
+	for _, tt := range tests {
+		p := New(lexer.New(tt.input))
+		program := p.ParseProgram()
+		if len(p.Errors()) > 0 {
+			if tt.expectedErr == nil {
+				t.Log("Unexpected error, input:", tt.input)
+				printErrors(t, p.Errors())
+				t.FailNow()
+			}
+
+			if tt.expectedErr.Error() != p.Errors()[0].Error() {
+				t.Errorf("expected error: '%v', got '%v'", tt.expectedErr, p.Errors()[0])
+			}
+			continue
+		}
+
+		ifStmnt, ok := program.Statements[0].(*ast.IfStatement)
+		if !ok {
+			t.Errorf("expected *ast.IfStatement, got %T", program.Statements[0])
+			return
+		}
+		if ifStmnt.String() != tt.input {
+			t.Errorf("expected value '%s', got '%s'", tt.input, ifStmnt.String())
+		}
+	}
 }
 
 func printErrors(t *testing.T, errs []error) {
