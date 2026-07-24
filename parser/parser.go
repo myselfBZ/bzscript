@@ -93,6 +93,8 @@ func (p *Parser) parse() ast.Statement {
 	switch p.curToken.Type {
 	case token.VAR:
 		return p.parseVarStatement()
+	case token.IF:
+		return p.parseIfStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -107,7 +109,7 @@ func (p *Parser) parseExpressionStatement() ast.Statement {
 func (p *Parser) parseExpression(prec Precedence) ast.Expression {
 	fn, ok := p.prefixFunc[p.curToken.Type]
 	if !ok {
-		p.onError(fmt.Errorf("invalid prefix expression token: %s", p.curToken.Literal))
+		p.onError(fmt.Errorf("expected expression, got: %s", p.curToken.Literal))
 		return nil
 	}
 	left := fn()
@@ -168,6 +170,56 @@ func (p *Parser) parseIntiger() ast.Expression {
 
 func (p *Parser) parseIdent() ast.Expression {
 	return &ast.Ident{Value: p.curToken.Literal, Token: p.curToken}
+}
+
+func (p *Parser) parseIfStatement() ast.Statement {
+	node := &ast.IfStatement{Token: p.curToken}
+	p.next()
+	condition := p.parseExpression(LOWEST)
+	if condition == nil {
+		return nil
+	}
+	node.Condition = condition
+	if !p.peekTokenIs(token.LBRACE) {
+		p.onError(fmt.Errorf("missing { on if statement block, got: %s", p.peekTok.Literal))
+		return nil
+	}
+	p.next()
+	consequence := p.parseBlock()
+	if consequence == nil {
+		return nil
+	}
+	node.Consequence = consequence
+	if p.peekTokenIs(token.ELSE) {
+		p.next()
+		if !p.peekTokenIs(token.LBRACE) {
+			p.onError(fmt.Errorf("missing { on else statement block"))
+			return nil
+		}
+		p.next()
+		alternative := p.parseBlock()
+		if alternative == nil {
+			return nil
+		}
+		node.Alternative = alternative
+		return node
+	}
+	return node
+}
+
+func (p *Parser) parseBlock() *ast.Block {
+	node := &ast.Block{Token: p.curToken}
+	p.next()
+	for !p.curTokenIs(token.RBRACE) && !p.curTokenIs(token.EOF) {
+		stmnt := p.parse()
+		node.Statements = append(node.Statements, stmnt)
+		p.next()
+	}
+	if !p.curTokenIs(token.RBRACE) {
+		p.onError(fmt.Errorf("missing } at the end of the block"))
+		return nil
+	}
+	return node
 }
 
 func (p *Parser) parseVarStatement() ast.Statement {
