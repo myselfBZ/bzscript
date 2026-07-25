@@ -21,10 +21,11 @@ const (
 )
 
 var precedences = map[token.TokenType]Precedence{
-	token.LPAREN: 		  CALL,
+	token.LPAREN:         CALL,
 	token.PLUS:           ADD_SUB,
 	token.MINUS:          ADD_SUB,
 	token.MULTIPLICATION: MULTI_DIV,
+	token.MODULO:         MULTI_DIV,
 	token.DIVISION:       MULTI_DIV,
 	token.GT:             COMPARISION,
 	token.LT:             COMPARISION,
@@ -68,6 +69,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefixFunc(token.MINUS, p.parsePrefix)
 
 	p.registerInfixFunc(token.PLUS, p.parseInfixExpr)
+	p.registerInfixFunc(token.MODULO, p.parseInfixExpr)
 	p.registerInfixFunc(token.MINUS, p.parseInfixExpr)
 	p.registerInfixFunc(token.MULTIPLICATION, p.parseInfixExpr)
 	p.registerInfixFunc(token.LPAREN, p.parseFunctionCall)
@@ -101,6 +103,8 @@ func (p *Parser) parse() ast.Statement {
 		return p.parseIfStatement()
 	case token.FUNCTION:
 		return p.parseFunctionLiteral()
+	case token.RETURN:
+		return p.parseReturnStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -324,6 +328,12 @@ func (p *Parser) parseBlock() *ast.Block {
 		p.onError(fmt.Errorf("missing } at the end of the block"))
 		return nil
 	}
+	return node
+}
+
+func (p *Parser) parseReturnStatement() ast.Statement {
+	node := &ast.ReturnStatement{Token: p.curToken}
+	node.Value = p.parseExpression(LOWEST)
 	return node
 }
 

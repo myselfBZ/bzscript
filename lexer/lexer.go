@@ -169,6 +169,8 @@ func (l *Lexer) NextToken() *token.Token {
 		t.Type = token.EOF
 	case '*':
 		t = token.NewToken(token.MULTIPLICATION, string(l.ch))
+	case '%':
+		t = token.NewToken(token.MODULO, string(l.ch))
 	default:
 		if isDigit(l.ch) {
 			d := l.readDigit()

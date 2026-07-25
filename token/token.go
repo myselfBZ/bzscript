@@ -46,6 +46,7 @@ const (
 	MINUS          = "-"
 	DIVISION       = "/"
 	MULTIPLICATION = "*"
+	MODULO		   = "%"
 	LT             = "<"
 	GT             = ">"
 	RETURN         = "RETURN"

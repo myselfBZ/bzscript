@@ -207,6 +207,7 @@ func TestInfix(t *testing.T) {
 		expected *ast.InfixExpression
 	}{
 		{input: "1 + 1", expected: &ast.InfixExpression{Operator: "+", Left: &ast.Intiger{Value: 1}, Right: &ast.Intiger{Value: 1}}},
+		{input: "x % 2", expected: &ast.InfixExpression{Operator: "%", Left: &ast.Ident{Value: "x"}, Right: &ast.Intiger{Value: 2}}},
 		{input: "x - y", expected: &ast.InfixExpression{Operator: "-", Left: &ast.Ident{Value: "x"}, Right: &ast.Ident{Value: "y"}}},
 		{input: "x == y", expected: &ast.InfixExpression{Operator: "==", Left: &ast.Ident{Value: "x"}, Right: &ast.Ident{Value: "y"}}},
 		{input: "x <= y", expected: &ast.InfixExpression{Operator: "<=", Left: &ast.Ident{Value: "x"}, Right: &ast.Ident{Value: "y"}}},
