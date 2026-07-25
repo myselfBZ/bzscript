@@ -14,6 +14,8 @@ var (
 	_ Expression = (*Float)(nil)
 	_ Expression = (*String)(nil)
 	_ Expression = (*Ident)(nil)
+	_ Expression = (*FunctionLiteral)(nil)
+	_ Expression = (*AnonymousFuncLiteral)(nil)
 )
 
 var (
@@ -21,6 +23,7 @@ var (
 	_ Statement = (*ExpressionStatement)(nil)
 	_ Statement = (*Block)(nil)
 	_ Statement = (*IfStatement)(nil)
+	_ Statement = (*ReturnStatement)(nil)
 )
 
 type Program struct {
@@ -300,3 +303,19 @@ func (f *FunctionCall) TokenLiteral() string {
 	return f.Token.Literal
 }
 func (f *FunctionCall) expressionNode() {}
+
+type ReturnStatement struct {
+	Token *token.Token
+	Value Expression
+}
+func (f *ReturnStatement) String() string {
+	buff := &bytes.Buffer{}
+	buff.WriteString(f.Token.Literal)
+	buff.WriteString(" ")
+	buff.WriteString(f.Value.String())
+	return buff.String()
+}
+func (f *ReturnStatement) TokenLiteral() string {
+	return f.Token.Literal
+}
+func (f *ReturnStatement) statementNode() {}
