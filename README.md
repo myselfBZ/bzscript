@@ -54,9 +54,9 @@ if age < 18 {
 ```bzscript
 // structures, or grouped data
 struct Human {
-    name
-    age
-    social_security
+    name;
+    age;
+    social_security;
 }
 
 var me = Human{name: "myselfBZ", age:19, social_security:"$$%#$$%#"}
@@ -76,7 +76,7 @@ var scores = map{
 var entity = scores["John"]
 
 if entity.exists {
-    puts("John has", entity.val, "scores")
+    puts("John has", entity.value, "scores")
 } else {
     puts("John is not on the scores map")
 }
