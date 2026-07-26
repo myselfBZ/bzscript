@@ -60,11 +60,79 @@ func evalInfix(left object.Object, right object.Object, oprt string) object.Obje
 
 	// TODO 
 	case object.INTIGER:
-		return nil
+		return evalIntigerInfix(left, right, oprt)
 	case object.BOOL:
-		return nil
+		return evalBoolInfix(left, right, oprt)
 	default:
 		return nil
+	}
+}
+
+func evalBoolInfix(left, right object.Object, oprt string) object.Object {
+	leftVal := left.(*object.Bool).Value
+	rightVal := right.(*object.Bool).Value
+
+	switch oprt {
+	case "==":
+		if leftVal == rightVal {
+			return True
+		}
+		return False
+	case "!=":
+		if leftVal != rightVal {
+			return True
+		}
+		return False
+	default:
+		return newError("cannot perform '%s' operator on booleans", oprt)
+	}
+}
+
+func evalIntigerInfix(left, right object.Object, oprt string) object.Object {
+	leftVal := left.(*object.Intiger).Value
+	rightVal := right.(*object.Intiger).Value
+
+	switch oprt {
+	case "+":
+		return &object.Intiger{Value: leftVal + rightVal}
+	case "-":
+		return &object.Intiger{Value: leftVal - rightVal}
+	case "/":
+		return &object.Intiger{Value: leftVal / rightVal}
+	case "*":
+		return &object.Intiger{Value: leftVal * rightVal}
+	case "==":
+		if leftVal == rightVal {
+			return True
+		}
+		return False
+	case "!=":
+		if leftVal != rightVal {
+			return True
+		}
+		return False
+	case "<=":
+		if leftVal <= rightVal {
+			return True
+		}
+		return False
+	case ">=":
+		if leftVal >= rightVal {
+			return True
+		}
+		return False
+	case ">":
+		if leftVal > rightVal {
+			return True
+		}
+		return False
+	case "<":
+		if leftVal < rightVal {
+			return True
+		}
+		return False
+	default:
+		return newError("invalid infix operator '%s'", oprt)
 	}
 }
 
