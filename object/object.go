@@ -7,6 +7,10 @@ type ObjType string
 
 const (
 	INTIGER = "intiger"
+	FLOAT 	= "float"
+	STRING 	= "string"
+	BOOL    = "boolean"
+	ERROR 	= "error"
 )
 
 func NewEnclosedEnvironment(outer *Environment) *Environment {
@@ -52,4 +56,46 @@ func (i *Intiger) Inspect() string {
 }
 func (i *Intiger) Type() ObjType {
 	return INTIGER
+}
+
+type Float struct {
+	Value float64
+}
+func (f *Float) Inspect() string {
+	return fmt.Sprintf("%v", f.Value)
+}
+func (f *Float) Type() ObjType {
+	return FLOAT
+}
+
+
+type String struct {
+	Value string
+}
+func (s *String) Inspect() string {
+	return fmt.Sprintf("%s", s.Value)
+}
+func (s *String) Type() ObjType {
+	return STRING
+}
+
+
+type Bool struct {
+	Value bool
+}
+func (b *Bool) Inspect() string {
+	return fmt.Sprintf("%v", b.Value)
+}
+func (b *Bool) Type() ObjType {
+	return BOOL
+}
+
+type Error struct {
+	Message string
+}
+func (e *Error) Inspect() string {
+	return e.Message
+}
+func (e *Error) Type() ObjType {
+	return ERROR
 }
