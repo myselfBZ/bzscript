@@ -56,16 +56,12 @@ func evalInfix(left object.Object, right object.Object, oprt string) object.Obje
 		return &object.String{Value: leftStr + rightStr}
 	case object.FLOAT:
 		return evalFloatInfix(left, right, oprt)
-
-
-	// TODO 
 	case object.INTIGER:
 		return evalIntigerInfix(left, right, oprt)
 	case object.BOOL:
 		return evalBoolInfix(left, right, oprt)
-	default:
-		return nil
 	}
+	return newError("invalid type inside an infix expression: %s", left.Type())	
 }
 
 func evalBoolInfix(left, right object.Object, oprt string) object.Object {
