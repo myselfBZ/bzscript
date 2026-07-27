@@ -9,7 +9,7 @@ import (
 	"github.com/myselfBZ/bzscript/parser"
 )
 
-func TestLetStatement(t *testing.T) {
+func TestVarStatement(t *testing.T) {
 	tests := []struct {
 		input    string
 		expected any
