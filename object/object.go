@@ -19,6 +19,7 @@ const (
 	ERROR 	= "error"
 	RETURN  = "return_value"
 	FUNCTION = "function"
+	BUILTIN = "builtin"
 )
 
 func NewEnclosedEnvironment(outer *Environment) *Environment {
@@ -141,3 +142,16 @@ func (f *Function) Inspect() string{
     out.WriteString("\n}")
     return out.String()
 }
+
+type BuiltIn struct {
+	Fn BuiltInFunc
+}
+type BuiltInFunc func(...Object) Object
+
+func (f *BuiltIn) Type() ObjType {
+	return BUILTIN
+}
+func (f *BuiltIn) Inspect() string{
+	return "built-in function"
+}
+

@@ -8,6 +8,7 @@ var Keywords = map[string]string{
 	"true":TRUE,
 	"false":FALSE,
 	"var":VAR,
+	"return":RETURN,
 	"while":WHILE,
 	"if":IF,
 	"else":ELSE,

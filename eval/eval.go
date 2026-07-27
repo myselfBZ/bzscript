@@ -59,10 +59,12 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		enclosedEnv := object.NewEnclosedEnvironment(env)
 		if boolVal.Value {
 			result = evalBlockStatement(node.Consequence, enclosedEnv)
-		} else {
+			return result
+		} else if node.Alternative != nil {
 			result = evalBlockStatement(node.Alternative, enclosedEnv)
+			return result
 		}
-		return result
+		return Nothing
 	case *ast.ReturnStatement:
 		obj := &object.ReturnValue{}
 		obj.Value = Eval(node.Value, env)
@@ -71,10 +73,10 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 		return obj
 	case *ast.AnonymousFuncLiteral:
-		obj := &object.Function{Body: node.Body, Params: node.Params}
+		obj := &object.Function{Body: node.Body, Params: node.Params, Env: env}
 		return obj
 	case *ast.FunctionLiteral:
-		obj := &object.Function{Body: node.Body, Params: node.Params}
+		obj := &object.Function{Body: node.Body, Params: node.Params, Env: env}
 		env.Set(node.Ident.Value, obj)
 		return obj
 	case *ast.FunctionCall:
@@ -135,11 +137,14 @@ func evalBlockStatement(block *ast.Block, env *object.Environment) object.Object
 }
 
 func evalIdent(env *object.Environment, name string) object.Object {
-	val, ok := env.Get(name)
-	if !ok {
-		return newError("undefined: %s", name)
+	if f, ok := builtIns[name]; ok {
+		return f
 	}
-	return val
+	obj, ok := env.Get(name)
+	if !ok {
+		return newError("identifier not found %s", name)
+	}
+	return obj
 }
 
 func evalInfix(left object.Object, right object.Object, oprt string) object.Object {
@@ -197,6 +202,8 @@ func evalIntigerInfix(left, right object.Object, oprt string) object.Object {
 		return &object.Intiger{Value: leftVal / rightVal}
 	case "*":
 		return &object.Intiger{Value: leftVal * rightVal}
+	case "%":
+		return &object.Intiger{Value:leftVal % rightVal}
 	case "==":
 		if leftVal == rightVal {
 			return True
@@ -349,8 +356,8 @@ func applyFunction(f object.Object, args []object.Object) object.Object {
 		extendedEnv := extendFunctionEnv(function, args)
 		evaluated := Eval(function.Body, extendedEnv)
 		return unwrapReturnVal(evaluated)
-	// case *object.BuiltIn:
-	// 	return function.Fn(args...)
+	case *object.BuiltIn:
+		return function.Fn(args...)
 	default:
 		return newError("not a function: %s", f.Type())
 	}

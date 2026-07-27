@@ -356,6 +356,29 @@ func TestAnonymousFunc(t *testing.T) {
 	}
 }
 
+func TestReturnStatemetn(t *testing.T) {
+	input := `
+	return 12
+	`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	if program == nil {
+		t.Fatalf("ParseProgram() returned nil")
+	}
+	if len(program.Statements) != 1 {
+		t.Fatalf("expected 1 statement got %d", len(program.Statements))
+	}
+	s, ok := program.Statements[0].(*ast.ReturnStatement)
+	if !ok {
+		t.Fatalf("statement is not of kind ast.ReturnStatement got: %T", s)
+	}
+	if s.TokenLiteral() != "return" {
+		t.Fatalf("s.Token.Literal is not 'return' got %s", s.TokenLiteral())
+	}
+}
+
 func TestIfStatements(t *testing.T) {
 	tests := []struct{
 		input string // and expected value

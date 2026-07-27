@@ -333,6 +333,7 @@ func (p *Parser) parseBlock() *ast.Block {
 
 func (p *Parser) parseReturnStatement() ast.Statement {
 	node := &ast.ReturnStatement{Token: p.curToken}
+	p.next()
 	node.Value = p.parseExpression(LOWEST)
 	return node
 }
