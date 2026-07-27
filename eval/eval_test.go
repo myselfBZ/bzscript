@@ -18,6 +18,7 @@ func TestVarStatement(t *testing.T) {
 		{input: "var isnew = true\n  isnew", expected: true},
 		{input: "var devEnv = !true\n devEnv", expected: false},
 		{input: "var sum = 1 + 3\n sum", expected: 4},
+		{input: "var name = \"bzscript\"\n name", expected: "bzscript"},
 	}
 
 	for _, tt := range tests {

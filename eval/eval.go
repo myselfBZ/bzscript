@@ -11,7 +11,7 @@ var(
 	False = &object.Bool{Value: false}
 	True = &object.Bool{Value: true}
 	
-	// Temp, better than null
+	// Temp 
 	Nothing = &object.String{Value: "nothing"}
 )
 
