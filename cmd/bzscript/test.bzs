@@ -1,0 +1,5 @@
+var x = 24
+
+fun hello() {
+    var x = x + 1
+}

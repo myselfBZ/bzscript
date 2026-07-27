@@ -18,6 +18,8 @@ var(
 
 func Eval(node ast.Node, env *object.Environment) object.Object {
 	switch node := node.(type) {
+	case *ast.Program:
+		return evalProgram(node, env)
 	case *ast.Intiger:
 		return &object.Intiger{Value: node.Value}
 	case *ast.Float:
@@ -68,6 +70,23 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return obj.Value
 		}
 		return obj
+	case *ast.AnonymousFuncLiteral:
+		obj := &object.Function{Body: node.Body, Params: node.Params}
+		return obj
+	case *ast.FunctionLiteral:
+		obj := &object.Function{Body: node.Body, Params: node.Params}
+		env.Set(node.Ident.Value, obj)
+		return obj
+	case *ast.FunctionCall:
+		f := Eval(node.Function, env)
+		if isError(f) {
+			return f
+		}
+		args := evalExpressions(env, node.Args)
+		if len(args) == 1 && isError(args[0]) {
+			return args[0]
+		}
+		return applyFunction(f, args)
 	case *ast.PrefixExpression:
 		obj := Eval(node.Expression, env)
 		if isError(obj) {
@@ -87,6 +106,20 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	default:
 		return newError("unrecognized AST node: %T", node)
 	}
+}
+
+func evalProgram(node *ast.Program, env *object.Environment) object.Object {
+	var result object.Object
+	for _, v := range node.Statements {
+		result = Eval(v, env)
+		if err, ok := result.(*object.Error); ok {
+			return err
+		}
+		if returnV, ok := result.(*object.ReturnValue); ok {
+			return returnV.Value
+		}
+	}
+	return result
 }
 
 func evalBlockStatement(block *ast.Block, env *object.Environment) object.Object {
@@ -277,6 +310,49 @@ func evalBang(obj object.Object) object.Object {
 		return True
 	default:
 		return newError("cannot perform '!' operator on %T", obj)
+	}
+}
+
+func unwrapReturnVal(v object.Object) object.Object {
+	if r, ok := v.(*object.ReturnValue); ok {
+		return r.Value
+	}
+	return v
+}
+
+func extendFunctionEnv( fn *object.Function, args []object.Object) *object.Environment {
+	env := object.NewEnclosedEnvironment(fn.Env)
+	for paramIdx, param := range fn.Params {
+		env.Set(param.Value, args[paramIdx])
+	}
+	return env
+}
+
+func evalExpressions(env *object.Environment, exprs []ast.Expression) []object.Object {
+	result := make([]object.Object, len(exprs))
+	for i, e := range exprs {
+		r := Eval(e, env)
+		if isError(r) {
+			return []object.Object{r}
+		}
+		result[i] = r
+	}
+	return result
+}
+
+func applyFunction(f object.Object, args []object.Object) object.Object {
+	switch function := f.(type) {
+	case *object.Function:
+		if len(function.Params) != len(args) {
+			return newError("function call missing arguments")
+		}
+		extendedEnv := extendFunctionEnv(function, args)
+		evaluated := Eval(function.Body, extendedEnv)
+		return unwrapReturnVal(evaluated)
+	// case *object.BuiltIn:
+	// 	return function.Fn(args...)
+	default:
+		return newError("not a function: %s", f.Type())
 	}
 }
 
