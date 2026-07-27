@@ -29,6 +29,7 @@ func TestLexer(t *testing.T) {
 		{ input: "3.14", expected: token.NewToken(token.FLOAT, "3.14")},
 		{ input: "\"Hello\"", expected: token.NewToken(token.STRING, "Hello")},
 		{ input: "\"Hello", expected: token.NewToken(token.ILLEGAL, "Hello")},
+		{ input: "while", expected: token.NewToken(token.WHILE, "while")},
 	}
 
 	for _, tt := range input {

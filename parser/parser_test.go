@@ -379,6 +379,42 @@ func TestReturnStatemetn(t *testing.T) {
 	}
 }
 
+func TestWhileStatements(t *testing.T) {
+	tests := []struct{
+		input string // and expected value
+		expectedErr error
+	}{
+		{input: "while 1 > 2 {\nprint()\n}", expectedErr: nil},
+		{input: "while i < 200 {\ni + 1\n}", expectedErr: nil},
+	}
+
+	for _, tt := range tests {
+		p := New(lexer.New(tt.input))
+		program := p.ParseProgram()
+		if len(p.Errors()) > 0 {
+			if tt.expectedErr == nil {
+				t.Log("Unexpected error, input:", tt.input)
+				printErrors(t, p.Errors())
+				t.FailNow()
+			}
+
+			if tt.expectedErr.Error() != p.Errors()[0].Error() {
+				t.Errorf("expected error: '%v', got '%v'", tt.expectedErr, p.Errors()[0])
+			}
+			continue
+		}
+
+		loop, ok := program.Statements[0].(*ast.WhileLoop)
+		if !ok {
+			t.Errorf("expected *ast.IfStatement, got %T", program.Statements[0])
+			return
+		}
+		if loop.String() != tt.input {
+			t.Errorf("expected value '%s', got '%s'", tt.input, loop.String())
+		}
+	}
+}
+
 func TestIfStatements(t *testing.T) {
 	tests := []struct{
 		input string // and expected value

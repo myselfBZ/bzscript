@@ -101,6 +101,8 @@ func (p *Parser) parse() ast.Statement {
 		return p.parseVarStatement()
 	case token.IF:
 		return p.parseIfStatement()
+	case token.WHILE:
+		return p.parseWhileLoop()
 	case token.FUNCTION:
 		return p.parseFunctionLiteral()
 	case token.RETURN:
@@ -252,6 +254,23 @@ func (p *Parser) parseFunctionLiteral() ast.Statement {
 	p.next()
 	function.Body = p.parseBlock()
 	node.Expression = function
+	return node
+}
+
+func (p *Parser) parseWhileLoop() ast.Statement {
+	node := &ast.WhileLoop{Token: p.curToken}
+	p.next()
+	condition := p.parseExpression(LOWEST)
+	if condition == nil {
+		return nil
+	}
+	node.Condition = condition
+	p.next()
+	body := p.parseBlock()
+	if body == nil {
+		return nil
+	}
+	node.Body = body
 	return node
 }
 

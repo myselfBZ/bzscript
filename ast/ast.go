@@ -336,3 +336,22 @@ func (f *ReturnStatement) TokenLiteral() string {
 	return f.Token.Literal
 }
 func (f *ReturnStatement) statementNode() {}
+
+type WhileLoop struct {
+	Token *token.Token
+	Condition Expression
+	Body *Block
+}
+func (w *WhileLoop) String() string {
+	buff := &bytes.Buffer{}
+	buff.WriteString("while")
+	buff.WriteString(" ")
+	buff.WriteString(w.Condition.String())
+	buff.WriteString(" ")
+	buff.WriteString(w.Body.String())
+	return buff.String()
+}
+func (w *WhileLoop) TokenLiteral() string {
+	return w.Token.Literal
+}
+func (w *WhileLoop) statementNode() {}

@@ -72,6 +72,24 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return obj.Value
 		}
 		return obj
+	case *ast.WhileLoop:
+		for {
+			condition := Eval(node.Condition, env)
+			if isError(condition) {
+				return condition
+			}
+			boolVal, ok := condition.(*object.Bool)
+			if !ok {
+				return newError("non-boolean expression: %T", condition)
+			}
+			if !boolVal.Value {
+				return Nothing
+			}
+			obj := Eval(node.Body, env)
+			if isError(obj) {
+				return obj
+			}
+		}
 	case *ast.AnonymousFuncLiteral:
 		obj := &object.Function{Body: node.Body, Params: node.Params, Env: env}
 		return obj
