@@ -10,6 +10,9 @@ import (
 var(
 	False = &object.Bool{Value: false}
 	True = &object.Bool{Value: true}
+	
+	// Temp, better than null
+	Nothing = &object.String{Value: "nothing"}
 )
 
 
@@ -27,6 +30,17 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		} else {
 			return False
 		}
+	case *ast.Ident:
+		return evalIdent(env, node.Value)
+	case *ast.VarStatement:
+		val := Eval(node.Value, env)
+		if isError(val) {
+			return val
+		}
+		env.Set(node.Ident.Value, val)
+		return Nothing
+	case *ast.ExpressionStatement:
+		return Eval(node.Expression, env)
 	case *ast.PrefixExpression:
 		obj := Eval(node.Expression, env)
 		if isError(obj) {
@@ -46,6 +60,14 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	default:
 		return newError("unrecognized AST node: %T", node)
 	}
+}
+
+func evalIdent(env *object.Environment, name string) object.Object {
+	val, ok := env.Get(name)
+	if !ok {
+		return newError("undefined: %s", name)
+	}
+	return val
 }
 
 func evalInfix(left object.Object, right object.Object, oprt string) object.Object {

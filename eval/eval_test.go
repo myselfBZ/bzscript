@@ -9,9 +9,34 @@ import (
 	"github.com/myselfBZ/bzscript/parser"
 )
 
+func TestLetStatement(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected any
+	}{
+		{input: "var x = 12\n x ", expected: 12},
+		{input: "var isnew = true\n  isnew", expected: true},
+		{input: "var devEnv = !true\n devEnv", expected: false},
+		{input: "var sum = 1 + 3\n sum", expected: 4},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := parser.New(l)
+		program := p.ParseProgram()
+		env := object.NewEnvironment()
+		var obj object.Object
+		for _, s := range program.Statements {
+			obj = Eval(s, env)
+
+		}
+		testObject(t, obj, tt.expected)
+	}
+}
+
 func TestPrefix(t *testing.T) {
-	tests := []struct{
-		input string
+	tests := []struct {
+		input    string
 		expected any
 	}{
 		{input: "-100", expected: -100},
@@ -36,8 +61,8 @@ func TestPrefix(t *testing.T) {
 }
 
 func TestInfix(t *testing.T) {
-	tests := []struct{
-		input string
+	tests := []struct {
+		input    string
 		expected any
 	}{
 		{input: "1+1", expected: int64(2)},
@@ -58,8 +83,8 @@ func TestInfix(t *testing.T) {
 }
 
 func TestEvalTypes(t *testing.T) {
-	tests := []struct{
-		input string
+	tests := []struct {
+		input    string
 		expected any
 	}{
 		{input: "1", expected: int64(1)},
@@ -124,4 +149,3 @@ func testObject(t *testing.T, obj object.Object, expected any) {
 		}
 	}
 }
-
