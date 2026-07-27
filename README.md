@@ -25,6 +25,14 @@ fun addOne(x) {
 fun isEven(x) {
     return x % 2 == 0
 }
+// higher-order functions, and closures
+var f = fun (x) {
+    return fun(y) {
+        return x + y
+    }
+}
+var addTwo = f(2)
+addTwo(5) // 7
 ```
 
 ```js
