@@ -45,7 +45,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return Eval(node.Expression, env)
 	case *ast.Block:
 		enclosedEnv := object.NewEnclosedEnvironment(env)
-		return evalBlockStatement(node, enclosedEnv)
+		return evalBlockStatement(node, enclosedEnv, )
 	case *ast.IfStatement:
 		condition := Eval(node.Condition, env)
 		if isError(condition) {
@@ -74,6 +74,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return obj
 	case *ast.WhileLoop:
 		for {
+			enclosedEnv := object.NewEnclosedEnvironment(env)
 			condition := Eval(node.Condition, env)
 			if isError(condition) {
 				return condition
@@ -85,9 +86,12 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			if !boolVal.Value {
 				return Nothing
 			}
-			obj := Eval(node.Body, env)
-			if isError(obj) {
+			obj := evalWhileLoopBody(node.Body, enclosedEnv)
+			switch obj.(type) {
+			case *object.Error, *object.ReturnValue:
 				return obj
+			case *object.Break:
+				return Nothing
 			}
 		}
 	case *ast.AnonymousFuncLiteral:
@@ -123,20 +127,28 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return right
 		}
 		return evalInfix(left, right, node.Operator)
+	case *ast.BreakStatement:
+		return &object.Break{}
+	case *ast.ContinueStatement:
+		return &object.Continue{}
 	default:
-		return newError("unrecognized AST node: %T", node)
+		return newError("invalid statement: %s", node.TokenLiteral())
 	}
 }
 
 func evalProgram(node *ast.Program, env *object.Environment) object.Object {
 	var result object.Object
-	for _, v := range node.Statements {
-		result = Eval(v, env)
-		if err, ok := result.(*object.Error); ok {
-			return err
-		}
-		if returnV, ok := result.(*object.ReturnValue); ok {
-			return returnV.Value
+	for _, s := range node.Statements {
+		result = Eval(s, env)
+		switch obj := result.(type) {
+		case *object.Error:
+			return obj
+		case *object.ReturnValue:
+			return obj.Value
+		case *object.Break: 
+			return newError("break outside of while loop")
+		case *object.Continue:
+			return newError("continue outside of while loop")
 		}
 	}
 	return result
@@ -146,7 +158,23 @@ func evalBlockStatement(block *ast.Block, env *object.Environment) object.Object
 	var result object.Object 
 	for _, s := range block.Statements {
 		obj := Eval(s, env)
-		if isError(obj) || obj.Type() == object.RETURN {
+		if isError(obj) || 
+		obj.Type() == object.RETURN || 
+		obj.Type() == object.CONTINUE || 
+		obj.Type() == object.BREAK {
+			return obj
+		}
+		result = obj
+	}
+	return result
+}
+
+func evalWhileLoopBody(block *ast.Block, env *object.Environment) object.Object {
+	var result object.Object 
+	for _, s := range block.Statements {
+		obj := Eval(s, env)
+		switch obj.(type) {
+		case *object.ReturnValue, *object.Error, *object.Break, *object.Continue:
 			return obj
 		}
 		result = obj

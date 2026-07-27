@@ -24,6 +24,8 @@ var (
 	_ Statement = (*Block)(nil)
 	_ Statement = (*IfStatement)(nil)
 	_ Statement = (*ReturnStatement)(nil)
+	_ Statement = (*BreakStatement)(nil)
+	_ Statement = (*ContinueStatement)(nil)
 )
 
 type Program struct {
@@ -355,3 +357,26 @@ func (w *WhileLoop) TokenLiteral() string {
 	return w.Token.Literal
 }
 func (w *WhileLoop) statementNode() {}
+
+type BreakStatement struct{
+	Token *token.Token
+}
+func (b *BreakStatement) String() string {
+	return "break"
+}
+func (b *BreakStatement) TokenLiteral() string {
+	return b.Token.Literal
+}
+func (b *BreakStatement) statementNode() {}
+
+type ContinueStatement struct{
+	Token *token.Token
+}
+
+func (c *ContinueStatement) String() string {
+	return "continue"
+}
+func (c *ContinueStatement) TokenLiteral() string {
+	return c.Token.Literal
+}
+func (c *ContinueStatement) statementNode() {}

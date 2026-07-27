@@ -35,6 +35,12 @@ func main() {
 	lexer := lexer.New(input)
 	p := parser.New(lexer)
 	program := p.ParseProgram()
+	if len(p.Errors()) > 0 {
+		for _, e := range p.Errors() {
+			fmt.Println("error: ", e)
+		}
+		os.Exit(1)
+	}
 	env := object.NewEnvironment()
 	result := eval.Eval(program, env)
 	if result.Type() == object.ERROR {

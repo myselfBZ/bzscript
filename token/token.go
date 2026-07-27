@@ -2,17 +2,18 @@ package token
 
 type TokenType string
 
-
 var Keywords = map[string]string{
-	"fun":FUNCTION,
-	"true":TRUE,
-	"false":FALSE,
-	"var":VAR,
-	"return":RETURN,
-	"while":WHILE,
-	"if":IF,
-	"else":ELSE,
-	"map":MAP,
+	"fun":      FUNCTION,
+	"true":     TRUE,
+	"false":    FALSE,
+	"var":      VAR,
+	"return":   RETURN,
+	"while":    WHILE,
+	"if":       IF,
+	"else":     ELSE,
+	"map":      MAP,
+	"break":    BREAK,
+	"continue": CONTINUE,
 }
 
 type Token struct {
@@ -22,7 +23,7 @@ type Token struct {
 
 func NewToken(t TokenType, literal string) Token {
 	return Token{
-		Type: t,
+		Type:    t,
 		Literal: literal,
 	}
 }
@@ -32,7 +33,7 @@ const (
 	EOF            = "EOF"
 	IDENT          = "IDENT"
 	INT            = "INT"
-	FLOAT		   = "FLOAT"
+	FLOAT          = "FLOAT"
 	ASSIGN         = "="
 	PLUS           = "+"
 	COMMA          = ","
@@ -43,11 +44,13 @@ const (
 	FUNCTION       = "FUNCTION"
 	VAR            = "VAR"
 	WHILE          = "WHILE"
+	BREAK          = "BREAK"
+	CONTINUE       = "CONTINUE"
 	MAP            = "MAP"
 	MINUS          = "-"
 	DIVISION       = "/"
 	MULTIPLICATION = "*"
-	MODULO		   = "%"
+	MODULO         = "%"
 	LT             = "<"
 	GT             = ">"
 	RETURN         = "RETURN"

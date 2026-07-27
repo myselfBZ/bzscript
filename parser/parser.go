@@ -107,6 +107,10 @@ func (p *Parser) parse() ast.Statement {
 		return p.parseFunctionLiteral()
 	case token.RETURN:
 		return p.parseReturnStatement()
+	case token.CONTINUE:
+		return p.parseContinueStatement()
+	case token.BREAK:
+		return p.parseBreakStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -272,6 +276,14 @@ func (p *Parser) parseWhileLoop() ast.Statement {
 	}
 	node.Body = body
 	return node
+}
+
+func (p *Parser) parseBreakStatement() ast.Statement {
+	return &ast.BreakStatement{Token: p.curToken}
+}
+
+func (p *Parser) parseContinueStatement() ast.Statement {
+	return &ast.ContinueStatement{Token: p.curToken}
 }
 
 func (p *Parser) parseParams() []*ast.Ident {
