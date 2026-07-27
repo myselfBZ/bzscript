@@ -41,6 +41,33 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return Nothing
 	case *ast.ExpressionStatement:
 		return Eval(node.Expression, env)
+	case *ast.Block:
+		enclosedEnv := object.NewEnclosedEnvironment(env)
+		return evalBlockStatement(node, enclosedEnv)
+	case *ast.IfStatement:
+		condition := Eval(node.Condition, env)
+		if isError(condition) {
+			return condition
+		}
+		boolVal, ok := condition.(*object.Bool)
+		if !ok {
+			return newError("non-boolean expression: %T", condition)
+		}
+		var result object.Object
+		enclosedEnv := object.NewEnclosedEnvironment(env)
+		if boolVal.Value {
+			result = evalBlockStatement(node.Consequence, enclosedEnv)
+		} else {
+			result = evalBlockStatement(node.Alternative, enclosedEnv)
+		}
+		return result
+	case *ast.ReturnStatement:
+		obj := &object.ReturnValue{}
+		obj.Value = Eval(node.Value, env)
+		if isError(obj.Value) {
+			return obj.Value
+		}
+		return obj
 	case *ast.PrefixExpression:
 		obj := Eval(node.Expression, env)
 		if isError(obj) {
@@ -60,6 +87,18 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	default:
 		return newError("unrecognized AST node: %T", node)
 	}
+}
+
+func evalBlockStatement(block *ast.Block, env *object.Environment) object.Object {
+	var result object.Object 
+	for _, s := range block.Statements {
+		obj := Eval(s, env)
+		if isError(obj) {
+			return obj
+		}
+		result = obj
+	}
+	return result
 }
 
 func evalIdent(env *object.Environment, name string) object.Object {
@@ -240,7 +279,6 @@ func evalBang(obj object.Object) object.Object {
 		return newError("cannot perform '!' operator on %T", obj)
 	}
 }
-
 
 func isError(obj object.Object) bool {
 	_, ok := obj.(*object.Error)

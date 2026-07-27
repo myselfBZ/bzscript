@@ -35,6 +35,31 @@ func TestVarStatement(t *testing.T) {
 	}
 }
 
+func TestIfStatement(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected any
+	}{
+		{input: "var x = true\nif x { var innerX = 1\n innerX } else { 0 }", expected: 1},
+		{input: "var x = 10\nif x > 9 { 1 } else { 0 }", expected: 1},
+		{input: "var x = 10\nif x < 9 { 1 } else { 0 }", expected: 0},
+		{input: "var x = \"X\"\nif x == \"X\" { 1 } else { 0 }", expected: 1},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := parser.New(l)
+		program := p.ParseProgram()
+		env := object.NewEnvironment()
+		var obj object.Object
+		for _, s := range program.Statements {
+			obj = Eval(s, env)
+
+		}
+		testObject(t, obj, tt.expected)
+	}
+}
+
 func TestPrefix(t *testing.T) {
 	tests := []struct {
 		input    string

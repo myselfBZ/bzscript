@@ -1,6 +1,9 @@
 package object
 
-import "fmt"
+import (
+	"fmt"
+
+)
 
 
 type ObjType string
@@ -11,6 +14,7 @@ const (
 	STRING 	= "string"
 	BOOL    = "boolean"
 	ERROR 	= "error"
+	RETURN  = "return_value"
 )
 
 func NewEnclosedEnvironment(outer *Environment) *Environment {
@@ -99,3 +103,14 @@ func (e *Error) Inspect() string {
 func (e *Error) Type() ObjType {
 	return ERROR
 }
+
+type ReturnValue struct {
+	Value Object
+}
+func (r *ReturnValue) Inspect() string {
+	return r.Value.Inspect()
+}
+func (r *ReturnValue) Type() ObjType {
+	return RETURN
+}
+
