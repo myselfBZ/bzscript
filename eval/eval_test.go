@@ -9,6 +9,53 @@ import (
 	"github.com/myselfBZ/bzscript/parser"
 )
 
+func TestPrefix(t *testing.T) {
+	tests := []struct{
+		input string
+		expected any
+	}{
+		{input: "-100", expected: -100},
+		{input: "-(-100)", expected: 100},
+		{input: "-3.14", expected: -3.14},
+		{input: "-(4.5) + (-(-4.5))", expected: 0.0},
+
+		{input: "!true", expected: false},
+		{input: "!!true", expected: true},
+		{input: "!(!(!false))", expected: true},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := parser.New(l)
+		program := p.ParseProgram()
+		env := object.NewEnvironment()
+		expression := program.Statements[0].(*ast.ExpressionStatement).Expression
+		obj := Eval(expression, env)
+		testObject(t, obj, tt.expected)
+	}
+}
+
+func TestInfix(t *testing.T) {
+	tests := []struct{
+		input string
+		expected any
+	}{
+		{input: "1+1", expected: int64(2)},
+		{input: "1+2*4", expected: int64(9)},
+		{input: "2.3 + 1.1", expected: 3.4},
+		{input: "33 + 55", expected: 88},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := parser.New(l)
+		program := p.ParseProgram()
+		env := object.NewEnvironment()
+		expression := program.Statements[0].(*ast.ExpressionStatement).Expression
+		obj := Eval(expression, env)
+		testObject(t, obj, tt.expected)
+	}
+}
 
 func TestEvalTypes(t *testing.T) {
 	tests := []struct{

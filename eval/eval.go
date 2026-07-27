@@ -27,12 +27,18 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		} else {
 			return False
 		}
+	case *ast.PrefixExpression:
+		obj := Eval(node.Expression, env)
+		if isError(obj) {
+			return obj
+		}
+		return evalPrefix(obj, node.Operator)
 	case *ast.InfixExpression:
-		left := Eval(node, env)
+		left := Eval(node.Left, env)
 		if isError(left) {
 			return left
 		}
-		right := Eval(node, env)
+		right := Eval(node.Right, env)
 		if isError(right) {
 			return right
 		}
@@ -177,6 +183,39 @@ func evalFloatInfix(left, right object.Object, oprt string) object.Object {
 		return False
 	default:
 		return newError("invalid infix operator '%s'", oprt)
+	}
+}
+
+func evalPrefix(obj object.Object, oprtr string) object.Object {
+	switch oprtr {
+	case "!":
+		return evalBang(obj)
+	case "-":
+		return evalMinus(obj)
+	default:
+		return newError("invalid prefix operator: %s", oprtr)
+	}
+}
+
+func evalMinus(obj object.Object) object.Object {
+	switch o := obj.(type) {
+	case *object.Intiger:
+		return &object.Intiger{Value: -o.Value}
+	case *object.Float:
+		return &object.Float{Value: -o.Value}
+	default:
+		return newError("cannot perform '-' operator on %T", obj)
+	}
+}
+
+func evalBang(obj object.Object) object.Object {
+	switch obj {
+	case True:
+		return False
+	case False:
+		return True
+	default:
+		return newError("cannot perform '!' operator on %T", obj)
 	}
 }
 
