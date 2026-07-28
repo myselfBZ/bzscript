@@ -54,12 +54,11 @@ func (l *Lexer) skipWhiteSpace() {
 }
 
 func (l *Lexer) readIdentifier() string {
-	var identifier string
+	position := l.pos
 	for isLetter(l.ch) || l.ch == '_' {
-		identifier += string(l.ch)
 		l.readChar()
 	}
-	return identifier
+	return l.input[position:l.pos]
 }
 
 func (l *Lexer) readChar() {
