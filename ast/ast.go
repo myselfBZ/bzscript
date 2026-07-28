@@ -26,6 +26,7 @@ var (
 	_ Statement = (*ReturnStatement)(nil)
 	_ Statement = (*BreakStatement)(nil)
 	_ Statement = (*ContinueStatement)(nil)
+	_ Statement = (*AssignStatement)(nil)
 )
 
 type Program struct {
@@ -380,3 +381,21 @@ func (c *ContinueStatement) TokenLiteral() string {
 	return c.Token.Literal
 }
 func (c *ContinueStatement) statementNode() {}
+
+type AssignStatement struct {
+	Token *token.Token
+	LHS, RHS Expression
+}
+func (a *AssignStatement) String() string {
+	buff := &bytes.Buffer{}
+	buff.WriteString(a.LHS.String())
+	buff.WriteString(" ")
+	buff.WriteString("=")
+	buff.WriteString(" ")
+	buff.WriteString(a.RHS.String())
+	return buff.String()
+}
+func (a *AssignStatement) TokenLiteral() string {
+	return a.Token.Literal
+}
+func (a *AssignStatement) statementNode() {}

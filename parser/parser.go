@@ -111,6 +111,9 @@ func (p *Parser) parse() ast.Statement {
 		return p.parseContinueStatement()
 	case token.BREAK:
 		return p.parseBreakStatement()
+	case token.IDENT, token.INT, token.FLOAT, token.STRING, token.LPAREN,
+	token.MINUS, token.BANG:
+		return p.parseSimpleStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -259,6 +262,28 @@ func (p *Parser) parseFunctionLiteral() ast.Statement {
 	function.Body = p.parseBlock()
 	node.Expression = function
 	return node
+}
+
+func (p *Parser) parseSimpleStatement() (stmt ast.Statement) {
+	lhs := p.parseExpression(LOWEST)
+
+	switch p.peekTok.Type {
+	case token.ASSIGN:
+		p.next()
+
+		tok := p.curToken 
+
+		p.next()
+
+		rhs := p.parseExpression(LOWEST)
+
+		stmt = &ast.AssignStatement{Token: tok, LHS: lhs, RHS: rhs}
+
+	default:
+		stmt = &ast.ExpressionStatement{Token: p.curToken, Expression: lhs}
+	}
+
+	return stmt
 }
 
 func (p *Parser) parseWhileLoop() ast.Statement {

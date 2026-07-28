@@ -72,6 +72,21 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return obj.Value
 		}
 		return obj
+	case *ast.AssignStatement:
+		ident, ok := node.LHS.(*ast.Ident)
+		if !ok {
+			return newError("cannot assign to %s, not addressable", node.LHS.TokenLiteral())
+		}
+		_, scope, ok := env.Get(ident.Value)
+		if !ok {
+			return newError("identifier not found %s", ident.Value)
+		}
+		rhs := Eval(node.RHS, env)
+		if isError(rhs) {
+			return rhs 
+		}
+		scope.Set(ident.Value, rhs)
+		return Nothing
 	case *ast.WhileLoop:
 		for {
 			enclosedEnv := object.NewEnclosedEnvironment(env)
@@ -186,7 +201,7 @@ func evalIdent(env *object.Environment, name string) object.Object {
 	if f, ok := builtIns[name]; ok {
 		return f
 	}
-	obj, ok := env.Get(name)
+	obj, _, ok := env.Get(name)
 	if !ok {
 		return newError("identifier not found %s", name)
 	}

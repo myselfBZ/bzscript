@@ -41,12 +41,13 @@ type Environment struct {
 	store map[string]Object
 }
 
-func (e *Environment) Get(name string) (Object, bool) {
+func (e *Environment) Get(name string) (Object, *Environment, bool) {
+	scope := e
 	obj, ok := e.store[name]
 	if !ok && e.outer != nil {
-		obj, ok = e.outer.Get(name)
+		obj, scope, ok = e.outer.Get(name)
 	}
-	return obj, ok
+	return obj, scope, ok 
 }
 
 func (e *Environment) Set(name string, obj Object) {
