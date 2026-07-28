@@ -39,7 +39,7 @@ addTwo(5) // 7
 // looping
 var x = 1
 while x < 10 {
-    puts("x is", x)
+    print("x is", x)
     x = x + 1
 }
 ```
@@ -93,7 +93,7 @@ var third_item = shoppingList[2]
 // visiting every element
 var i = 0
 while i < len(shopping_list) {
-    puts(shopping_list[i])
+    print(shopping_list[i])
     i = i + 1
 
 }
