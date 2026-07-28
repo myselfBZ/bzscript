@@ -7,16 +7,16 @@ import (
 )
 
 var builtIns = map[string]*object.BuiltIn{
-	"print":&object.BuiltIn{
+	"print":{
 		Fn: PrintBuiltin,
 	},
-	"len":&object.BuiltIn{
+	"len":{
 		Fn: LenBuiltin,
 	},
-	"float":&object.BuiltIn{
+	"float":{
 		Fn: FloatBuiltin,
 	},
-	"int":&object.BuiltIn{
+	"int":{
 		Fn: IntBuiltin,
 	},
 }
