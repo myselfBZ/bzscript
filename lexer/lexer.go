@@ -9,11 +9,6 @@ import (
 
 type DigitType string
 
-const (
-	dtIntiger DigitType = "intiger"
-	dtFloat   DigitType = "float"
-)
-
 type Digit struct {
 	Type  DigitType
 	Value string
@@ -71,27 +66,23 @@ func (l *Lexer) readChar() {
 	l.readPos += 1
 }
 
-func (l *Lexer) readDigit() *Digit {
-	var d Digit
-	d.Type = dtIntiger
-	var number string
+
+func (l *Lexer) readDigit() string {
+	position := l.pos
 	for isDigit(l.ch) {
-		number += string(l.ch)
 		l.readChar()
 	}
+	return l.input[position:l.pos]
+}
 
-	if l.ch == '.' {
-		number += "."
-		d.Type = dtFloat
-		l.readChar()
-		for isDigit(l.ch) {
-			number += string(l.ch)
-			l.readChar()
-		}
+func (l *Lexer) readNumberToken() token.Token {
+	intPart := l.readDigit()
+	if l.ch != '.' {
+		return token.NewToken(token.INT, intPart)
 	}
-
-	d.Value = number
-	return &d
+	l.readChar()
+	fracPart := l.readDigit()
+	return token.NewToken(token.FLOAT, intPart + "." + fracPart)
 }
 
 // TODO: handle malformed strings and edge cases
@@ -172,14 +163,7 @@ func (l *Lexer) NextToken() *token.Token {
 		t = token.NewToken(token.MODULO, string(l.ch))
 	default:
 		if isDigit(l.ch) {
-			d := l.readDigit()
-			if d.Type == dtIntiger {
-				t.Type = token.INT
-				t.Literal = d.Value
-			} else {
-				t.Type = token.FLOAT
-				t.Literal = d.Value
-			}
+			t = l.readNumberToken()
 			return &t
 		} else if isLetter(l.ch) {
 			word := l.readIdentifier()
