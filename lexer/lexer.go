@@ -55,7 +55,7 @@ func (l *Lexer) skipWhiteSpace() {
 
 func (l *Lexer) readIdentifier() string {
 	var identifier string
-	for isLetter(l.ch) {
+	for isLetter(l.ch) || l.ch == '_' {
 		identifier += string(l.ch)
 		l.readChar()
 	}

@@ -1,6 +1,14 @@
-var x = 0
-while x < 10 {
-    x = x + 1
-    print("x:", x)
+fun function() {
+    var i = 0
+    while i < 10 {
+        if i < 9 {
+            print("less than nine")
+            i = i + 1
+            continue
+        }
+        print("nine")
+        break
+    }
 }
 
+function()
