@@ -210,33 +210,37 @@ func (p *Parser) parseAnonymousFunc() ast.Expression {
 
 func (p *Parser) parseFunctionCall(function ast.Expression) ast.Expression {
 	node := &ast.FunctionCall{Token: p.curToken, Function: function}
-	node.Args = p.parseCallArguements()
+	node.Args = p.parseExpressionList(token.RPAREN)
 	return node
 }
 
-func (p *Parser) parseCallArguements() []ast.Expression {
-	var arguments []ast.Expression
-	if p.peekTokenIs(token.RPAREN) {
-		p.next()
-		return arguments
-	}
+func (p *Parser) parseExpressionList(end token.TokenType) []ast.Expression {
+	result := []ast.Expression{}
 	p.next()
-	arguments = append(arguments, p.parseExpression(LOWEST))
+	if p.curTokenIs(end) {
+		return result
+	}
+	first := p.parseExpression(LOWEST)
+	if first != nil {
+		result = append(result, first)
+	}
 	for p.peekTokenIs(token.COMMA) {
 		p.next()
-		if p.peekTokenIs(token.RPAREN) {
+		if p.peekTokenIs(end) {
 			break
 		}
 		p.next()
-		node := p.parseExpression(LOWEST)
-		arguments = append(arguments, node)
+		expr := p.parseExpression(LOWEST)
+		if expr != nil {
+			result = append(result, expr)
+		}
 	}
-	if !p.peekTokenIs(token.RPAREN) {
-		p.onError(p.expectedError(token.RPAREN, p.peekTok.Type))
+	if !p.peekTokenIs(end) {
+		p.onError(p.expectedError(end, p.peekTok.Type))
 		return nil
 	}
 	p.next()
-	return arguments
+	return result
 }
 
 func (p *Parser) parseFunctionLiteral() ast.Statement {
