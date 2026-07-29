@@ -1,14 +1,6 @@
-fun function() {
-    var i = 0
-    while i < 10 {
-        if i < 9 {
-            print("less than nine")
-            i = i + 1
-            continue
-        }
-        print("nine")
-        break
-    }
+var myArr = ["apples", "bananas", "pineappel"]
+var i = 0
+while i < 3 {
+    print(myArr[i])
+    i = i + 1
 }
-
-function()

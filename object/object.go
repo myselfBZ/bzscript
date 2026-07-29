@@ -11,6 +11,7 @@ import (
 type ObjType string
 
 const (
+	ARRAY    = "array"
 	INTIGER  = "intiger"
 	FLOAT    = "float"
 	STRING   = "string"
@@ -47,7 +48,7 @@ func (e *Environment) Get(name string) (Object, *Environment, bool) {
 	if !ok && e.outer != nil {
 		obj, scope, ok = e.outer.Get(name)
 	}
-	return obj, scope, ok 
+	return obj, scope, ok
 }
 
 func (e *Environment) Set(name string, obj Object) {
@@ -179,4 +180,22 @@ func (b *Break) Type() ObjType {
 }
 func (b *Break) Inspect() string {
 	return "break"
+}
+
+type Array struct {
+	Elements []Object
+}
+func (a *Array) Type() ObjType {
+	return ARRAY
+}
+func (a *Array) Inspect() string {
+	var out bytes.Buffer
+	elements := []string{}
+	for _, e := range a.Elements {
+		elements = append(elements, e.Inspect())
+	}
+	out.WriteString("[")
+	out.WriteString(strings.Join(elements, ", "))
+	out.WriteString("]")
+	return out.String()
 }

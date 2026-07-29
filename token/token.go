@@ -41,6 +41,8 @@ const (
 	RPAREN         = ")"
 	LBRACE         = "{"
 	RBRACE         = "}"
+	LBRACK		   = "["
+	RBRACK		   = "]"
 	FUNCTION       = "FUNCTION"
 	VAR            = "VAR"
 	WHILE          = "WHILE"

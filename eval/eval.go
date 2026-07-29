@@ -132,6 +132,22 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return obj
 		}
 		return evalPrefix(obj, node.Operator)
+	case *ast.ArrayLiteral:
+		elements := evalExpressions(env, node.Elements)
+		if len(elements) == 1 && isError(elements[0]) {
+			return elements[0]
+		}
+		return &object.Array{Elements: elements}
+	case *ast.IndexOperator:
+		obj := Eval(node.Left, env)
+		if isError(obj) {
+			return obj
+		}
+		idx := Eval(node.Index, env)
+		if isError(idx) {
+			return idx
+		}
+		return evalArrayIdx(obj, idx)
 	case *ast.InfixExpression:
 		left := Eval(node.Left, env)
 		if isError(left) {
@@ -195,6 +211,21 @@ func evalWhileLoopBody(block *ast.Block, env *object.Environment) object.Object 
 		result = obj
 	}
 	return result
+}
+
+func evalArrayIdx(array object.Object, idx object.Object) object.Object {
+	validArr, ok := array.(*object.Array)
+	if !ok {
+		return newError("not an array: %s", array.Type())
+	}
+	validIdx, ok := idx.(*object.Intiger) 
+	if !ok {
+		return newError("invalid index value: %s", idx.Type())
+	}
+	if validIdx.Value < 0 || validIdx.Value > int64(len(validArr.Elements)) {
+		return newError("index %d out of bounds array length: %d", validIdx.Value, len(validArr.Elements))
+	}
+	return validArr.Elements[validIdx.Value]
 }
 
 func evalIdent(env *object.Environment, name string) object.Object {

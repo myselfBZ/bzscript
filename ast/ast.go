@@ -3,6 +3,7 @@ package ast
 import (
 	"bytes"
 	"fmt"
+	"strings"
 
 	"github.com/myselfBZ/bzscript/token"
 )
@@ -16,6 +17,7 @@ var (
 	_ Expression = (*Ident)(nil)
 	_ Expression = (*FunctionLiteral)(nil)
 	_ Expression = (*AnonymousFuncLiteral)(nil)
+	_ Expression = (*ArrayLiteral)(nil)
 )
 
 var (
@@ -399,3 +401,42 @@ func (a *AssignStatement) TokenLiteral() string {
 	return a.Token.Literal
 }
 func (a *AssignStatement) statementNode() {}
+
+type ArrayLiteral struct{
+	Token *token.Token
+	Elements []Expression
+}
+
+func (a *ArrayLiteral) String() string {
+	buff := &bytes.Buffer{}
+	buff.WriteString("[")
+	elements := []string{}
+	for _, el := range a.Elements {
+		elements = append(elements, el.String())
+	}
+	buff.WriteString(strings.Join(elements, ","))
+	buff.WriteString("]")
+	return buff.String()
+}
+func (a *ArrayLiteral) TokenLiteral() string {
+	return a.Token.Literal
+}
+func(a *ArrayLiteral) expressionNode() {}
+
+type IndexOperator struct {
+	Token *token.Token
+	Index Expression
+	Left Expression
+}
+func (i *IndexOperator) String() string {
+	buff := &bytes.Buffer{}
+	buff.WriteString(i.Left.String())
+	buff.WriteString("[")
+	buff.WriteString(i.Index.String())
+	buff.WriteString("]")
+	return buff.String()
+}
+func (i *IndexOperator) TokenLiteral() string {
+	return i.Token.Literal
+}
+func (i *IndexOperator) expressionNode() {}

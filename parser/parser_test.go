@@ -103,6 +103,48 @@ func TestParseVar(t *testing.T) {
 
 }
 
+func TestParsingIndexExpressions(t *testing.T) {
+	input := "myArray[1 + 1]"
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	if len(p.Errors()) > 0 {
+		t.Fatalf("unexpected error: %v", p.Errors()[0])
+	}
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	indexExp, ok := stmt.Expression.(*ast.IndexOperator)
+	if !ok {
+		t.Fatalf("exp not *ast.IndexExpression. got=%T", stmt.Expression)
+	}
+	assertExpressionEqual(t, &ast.Ident{Value: "myArray"}, indexExp.Left)
+	assertExpressionEqual(t, &ast.InfixExpression{Operator: "+", Left: &ast.Intiger{Value: 1}, Right: &ast.Intiger{Value: 1}}, indexExp.Index)
+}
+
+func TestParsingArrayLiterals(t *testing.T) {
+	input := "[1, 2 * 2, 3 + 3]"
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	if len(p.Errors()) > 0 {
+		t.Fatalf("unexpected error: %v", p.Errors()[0])
+	}
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	array, ok := stmt.Expression.(*ast.ArrayLiteral)
+	if !ok {
+		t.Fatalf("exp not ast.ArrayLiteral. got=%T", stmt.Expression)
+	}
+	if len(array.Elements) != 3 {
+		t.Fatalf("len(array.Elements) not 3. got=%d", len(array.Elements))
+	}
+	assertExpressionEqual(t, array, &ast.ArrayLiteral{
+		Elements: []ast.Expression{
+			&ast.Intiger{Value: 1},
+			&ast.InfixExpression{Left: &ast.Intiger{Value: 2}, Right: &ast.Intiger{Value: 2}, Operator: "*"},
+			&ast.InfixExpression{Left: &ast.Intiger{Value: 3}, Right: &ast.Intiger{Value: 3}, Operator: "+"},
+		},
+	})
+}
+
 func TestGrouped(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -536,6 +578,11 @@ func assertExpressionEqual(t *testing.T, expected, actual ast.Expression) {
 			return
 		}
 		assertExpressionEqual(t, exp.Expression, act.Expression)
+	case *ast.ArrayLiteral:
+		act := assertExpressionNodeType[*ast.ArrayLiteral](t, actual)
+		for i, e := range exp.Elements {
+			assertExpressionEqual(t, e, act.Elements[i])
+		}
 	default:
 		t.Fatalf("unhandled expression type: %T", expected)
 	}

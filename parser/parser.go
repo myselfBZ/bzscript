@@ -18,6 +18,7 @@ const (
 	MULTI_DIV
 	PREFIX
 	CALL
+	INDEX
 )
 
 var precedences = map[token.TokenType]Precedence{
@@ -33,6 +34,7 @@ var precedences = map[token.TokenType]Precedence{
 	token.LTOREQ:         COMPARISION,
 	token.EQ:             COMPARISION,
 	token.NOT_EQ:         COMPARISION,
+	token.LBRACK:		  INDEX,
 }
 
 type PrefixParseFunc func() ast.Expression
@@ -67,6 +69,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefixFunc(token.IDENT, p.parseIdent)
 	p.registerPrefixFunc(token.BANG, p.parsePrefix)
 	p.registerPrefixFunc(token.MINUS, p.parsePrefix)
+	p.registerPrefixFunc(token.LBRACK, p.parseArrayLiteral)
 
 	p.registerInfixFunc(token.PLUS, p.parseInfixExpr)
 	p.registerInfixFunc(token.MODULO, p.parseInfixExpr)
@@ -80,6 +83,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfixFunc(token.LTOREQ, p.parseInfixExpr)
 	p.registerInfixFunc(token.LT, p.parseInfixExpr)
 	p.registerInfixFunc(token.GT, p.parseInfixExpr)
+	p.registerInfixFunc(token.LBRACK, p.parseIndexOperator)
 	return p
 }
 
@@ -112,7 +116,7 @@ func (p *Parser) parse() ast.Statement {
 	case token.BREAK:
 		return p.parseBreakStatement()
 	case token.IDENT, token.INT, token.FLOAT, token.STRING, token.LPAREN,
-	token.MINUS, token.BANG:
+		token.MINUS, token.BANG:
 		return p.parseSimpleStatement()
 	default:
 		return p.parseExpressionStatement()
@@ -208,6 +212,24 @@ func (p *Parser) parseAnonymousFunc() ast.Expression {
 	return function
 }
 
+func (p *Parser) parseArrayLiteral() ast.Expression {
+	node := &ast.ArrayLiteral{Token: p.curToken}
+	node.Elements = p.parseExpressionList(token.RBRACK)
+	return node
+}
+
+func (p *Parser) parseIndexOperator(left ast.Expression) ast.Expression {
+	node := &ast.IndexOperator{Token: p.curToken, Left: left}
+	p.next()
+	node.Index = p.parseExpression(LOWEST)
+	if !p.peekTokenIs(token.RBRACK) {
+		p.onError(p.expectedError(token.RBRACK, p.peekTok.Type))
+		return nil
+	}
+	p.next()
+	return node
+}
+
 func (p *Parser) parseFunctionCall(function ast.Expression) ast.Expression {
 	node := &ast.FunctionCall{Token: p.curToken, Function: function}
 	node.Args = p.parseExpressionList(token.RPAREN)
@@ -275,7 +297,7 @@ func (p *Parser) parseSimpleStatement() (stmt ast.Statement) {
 	case token.ASSIGN:
 		p.next()
 
-		tok := p.curToken 
+		tok := p.curToken
 
 		p.next()
 

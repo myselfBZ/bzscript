@@ -65,6 +65,9 @@ func LenBuiltin(objs ...object.Object) object.Object {
 
 func PrintBuiltin(objs ...object.Object) object.Object {
 	for _, obj := range objs {
+		if obj == Nothing {
+			continue
+		}
 		switch t := obj.(type) {
 		case *object.Intiger:
 			fmt.Print(t.Value)
@@ -73,7 +76,7 @@ func PrintBuiltin(objs ...object.Object) object.Object {
 		case *object.String:
 			fmt.Print(t.Value)
 		default:
-			return newError("non-printable object: %s", obj.Type())
+			fmt.Printf("non-printable object: %s", obj.Type())
 		}
 		fmt.Print(" ")
 	}

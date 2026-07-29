@@ -138,6 +138,11 @@ func (l *Lexer) NextToken() *token.Token {
 		t = token.NewToken(token.LBRACE, string(l.ch))
 	case '}':
 		t = token.NewToken(token.RBRACE, string(l.ch))
+
+	case '[':
+		t = token.NewToken(token.LBRACK, string(l.ch))
+	case ']':
+		t = token.NewToken(token.RBRACK, string(l.ch))
 	case '>':
 		if l.peek() == '=' {
 			l.readChar()
