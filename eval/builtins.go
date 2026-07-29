@@ -58,6 +58,8 @@ func LenBuiltin(objs ...object.Object) object.Object {
 	switch t := objs[0].(type) {
 	case *object.String:
 		return &object.Intiger{Value: int64(len(t.Value))}
+	case *object.Array:
+		return &object.Intiger{Value: int64(len(t.Elements))}
 	default:
 		return newError("length of type %s cannot be measured", objs[0].Type())
 	}
