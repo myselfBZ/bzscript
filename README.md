@@ -54,6 +54,23 @@ if age < 18 {
 }
 ```
 
+```js
+// arrays
+var shopping_list = ["apples", "bananas", "pineapple"]
+var first_item = shoppingList[0]
+var second_item = shoppingList[1]
+var third_item = shoppingList[2]
+
+// visiting every element
+var i = 0
+while i < len(shopping_list) {
+    print(shopping_list[i])
+        i = i + 1
+
+}
+```
+
+# Coming soon...
 ```go
 // structures, or grouped data
 struct Human {
@@ -83,18 +100,3 @@ if entity.exists {
 }
 ```
 
-```js
-// arrays
-var shopping_list = ["apples", "bananas", "pineapple"]
-var first_item = shoppingList[0]
-var second_item = shoppingList[1]
-var third_item = shoppingList[2]
-
-// visiting every element
-var i = 0
-while i < len(shopping_list) {
-    print(shopping_list[i])
-    i = i + 1
-
-}
-```
