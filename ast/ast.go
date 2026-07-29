@@ -440,3 +440,25 @@ func (i *IndexOperator) TokenLiteral() string {
 	return i.Token.Literal
 }
 func (i *IndexOperator) expressionNode() {}
+
+type MapLiteral struct {
+	Token *token.Token
+	Kv map[Expression]Expression
+}
+func (m *MapLiteral) String() string {
+	buff := &bytes.Buffer{}
+	buff.WriteString("map")
+	buff.WriteString("{")
+	for _, k := range m.Kv {
+		buff.WriteString(k.String())
+		buff.WriteString(":")
+		buff.WriteString(m.Kv[k].String())
+		buff.WriteString(",")
+	}
+	buff.WriteString("}")
+	return buff.String()
+}
+func (m *MapLiteral) TokenLiteral() string {
+	return m.Token.Literal
+}
+func (m *MapLiteral) expressionNode() {}

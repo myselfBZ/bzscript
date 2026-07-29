@@ -64,6 +64,7 @@ const (
 	NOT_EQ         = "!="
 	GTOREQ         = ">="
 	LTOREQ         = "<="
+	COLON 		   = ":"
 	BANG           = "!"
 	STRING         = "STRING"
 )

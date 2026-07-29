@@ -70,6 +70,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefixFunc(token.BANG, p.parsePrefix)
 	p.registerPrefixFunc(token.MINUS, p.parsePrefix)
 	p.registerPrefixFunc(token.LBRACK, p.parseArrayLiteral)
+	p.registerPrefixFunc(token.MAP, p.parseMap)
 
 	p.registerInfixFunc(token.PLUS, p.parseInfixExpr)
 	p.registerInfixFunc(token.MODULO, p.parseInfixExpr)
@@ -216,6 +217,48 @@ func (p *Parser) parseArrayLiteral() ast.Expression {
 	node := &ast.ArrayLiteral{Token: p.curToken}
 	node.Elements = p.parseExpressionList(token.RBRACK)
 	return node
+}
+
+func (p *Parser) parseMap() ast.Expression {
+	m := &ast.MapLiteral{Token: p.curToken, Kv: make(map[ast.Expression]ast.Expression)}
+	if !p.peekTokenIs(token.LBRACE) {
+		p.onError(p.expectedError(token.RBRACE, p.peekTok.Type))
+		return nil
+	}
+	p.next()
+	p.next()
+	if p.curTokenIs(token.RBRACE) {
+		return m
+	}
+	k, v := p.parseKv()
+	m.Kv[k] = v
+	for p.peekTokenIs(token.COMMA) {
+		p.next()
+		if p.peekTokenIs(token.RBRACE) {
+			break
+		}
+		p.next()
+		k, v := p.parseKv()
+		m.Kv[k] = v
+	}
+	if !p.peekTokenIs(token.RBRACE) {
+		p.onError(p.expectedError(token.RBRACE, p.peekTok.Type))
+		return nil
+	}
+	p.next()
+	return m
+}
+
+func (p *Parser) parseKv() (ast.Expression, ast.Expression) {
+	k := p.parseExpression(LOWEST)
+	if !p.peekTokenIs(token.COLON) {
+		p.onError(p.expectedError(token.COLON, p.peekTok.Type))
+		return nil, nil
+	}
+	p.next()
+	p.next()
+	v := p.parseExpression(LOWEST)
+	return k, v
 }
 
 func (p *Parser) parseIndexOperator(left ast.Expression) ast.Expression {

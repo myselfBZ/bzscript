@@ -7,13 +7,6 @@ import (
 	"github.com/myselfBZ/bzscript/token"
 )
 
-type DigitType string
-
-type Digit struct {
-	Type  DigitType
-	Value string
-}
-
 func New(input string) *Lexer {
 	l := &Lexer{input: input}
 	l.readChar()
@@ -138,7 +131,8 @@ func (l *Lexer) NextToken() *token.Token {
 		t = token.NewToken(token.LBRACE, string(l.ch))
 	case '}':
 		t = token.NewToken(token.RBRACE, string(l.ch))
-
+	case ':':
+		t = token.NewToken(token.COLON, string(l.ch))
 	case '[':
 		t = token.NewToken(token.LBRACK, string(l.ch))
 	case ']':

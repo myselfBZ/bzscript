@@ -145,6 +145,46 @@ func TestParsingArrayLiterals(t *testing.T) {
 	})
 }
 
+func TestParsingMap(t *testing.T) {
+	expected := map[string]int64{
+		"You":12,
+		"Me":34,
+		"Him":5,
+	}
+	input := "map{\"You\":12, \"Me\": 34, \"Him\": 5}"
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	if len(p.Errors()) > 0 {
+		t.Fatalf("unexpected error: %v", p.Errors()[0])
+	}
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	m, ok := stmt.Expression.(*ast.MapLiteral)
+	if !ok {
+		t.Fatalf("exp not ast.ArrayLiteral. got=%T", stmt.Expression)
+	}
+	if len(m.Kv) != 3 {
+		t.Fatalf("len(array.Elements) not 3. got=%d", len(m.Kv))
+	}
+	for k := range m.Kv {
+		s, ok := k.(*ast.String)
+		if !ok {
+			t.Fatalf("expected the key to be string, got %T", k)
+		}
+		val, ok := expected[s.Value]
+		if !ok {
+			t.Fatalf("key %s not found in the expected", s.Value)
+		}
+		actualVal, ok := m.Kv[k].(*ast.Intiger)
+		if !ok {
+			t.Fatalf("key %s does not hold an integer, got %T", s.Value, m.Kv[k])
+		}
+		if val != actualVal.Value {
+			t.Fatalf("key %s's value did not match the actual value: expected %d, got %d", s.Value, val, actualVal.Value)
+		}
+	}
+}
+
 func TestGrouped(t *testing.T) {
 	tests := []struct {
 		input    string
