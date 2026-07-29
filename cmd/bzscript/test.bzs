@@ -1,6 +1,0 @@
-var myArr = ["apples", "bananas", "pineappel"]
-var i = 0
-while i < len(myArr) {
-    print(myArr[i])
-    i = i + 1
-}
