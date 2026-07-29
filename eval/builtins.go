@@ -19,6 +19,9 @@ var builtIns = map[string]*object.BuiltIn{
 	"int":{
 		Fn: IntBuiltin,
 	},
+	"push":{
+		Fn: PushBuiltin,
+	},
 }
 
 
@@ -48,6 +51,18 @@ func FloatBuiltin(objs ...object.Object) object.Object {
 	default:
 		return newError("%s cannot be converted to float", objs[0].Type())
 	}
+}
+
+func PushBuiltin(objs ...object.Object) object.Object {
+	if len(objs) != 2 {
+		return newError("push() requires 2 arguments, got %d", len(objs))
+	}
+	arr, ok := objs[0].(*object.Array)
+	if !ok {
+		return newError("push() requires an Array as the first argument, got %s", objs[0].Type())
+	}
+	arr.Elements = append(arr.Elements, objs[1])
+	return Nothing
 }
 
 func LenBuiltin(objs ...object.Object) object.Object {
