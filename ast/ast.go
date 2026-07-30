@@ -51,7 +51,6 @@ func (p *Program) TokenLiteral() string {
 	return ""
 }
 
-
 func (p *Program) AddStatement(s Statement) {
 	p.Statements = append(p.Statements, s)
 }
@@ -308,13 +307,14 @@ type FunctionCall struct {
 	Function Expression
 	Args     []Expression
 }
+
 func (f *FunctionCall) String() string {
 	buff := &bytes.Buffer{}
 	buff.WriteString(f.Function.String())
 	buff.WriteString("(")
 	for i, e := range f.Args {
 		buff.WriteString(e.String())
-		if i != len(f.Args) - 1 {
+		if i != len(f.Args)-1 {
 			buff.WriteString(", ")
 		}
 	}
@@ -330,6 +330,7 @@ type ReturnStatement struct {
 	Token *token.Token
 	Value Expression
 }
+
 func (f *ReturnStatement) String() string {
 	buff := &bytes.Buffer{}
 	buff.WriteString(f.Token.Literal)
@@ -343,10 +344,11 @@ func (f *ReturnStatement) TokenLiteral() string {
 func (f *ReturnStatement) statementNode() {}
 
 type WhileLoop struct {
-	Token *token.Token
+	Token     *token.Token
 	Condition Expression
-	Body *Block
+	Body      *Block
 }
+
 func (w *WhileLoop) String() string {
 	buff := &bytes.Buffer{}
 	buff.WriteString("while")
@@ -361,9 +363,10 @@ func (w *WhileLoop) TokenLiteral() string {
 }
 func (w *WhileLoop) statementNode() {}
 
-type BreakStatement struct{
+type BreakStatement struct {
 	Token *token.Token
 }
+
 func (b *BreakStatement) String() string {
 	return "break"
 }
@@ -372,7 +375,7 @@ func (b *BreakStatement) TokenLiteral() string {
 }
 func (b *BreakStatement) statementNode() {}
 
-type ContinueStatement struct{
+type ContinueStatement struct {
 	Token *token.Token
 }
 
@@ -385,9 +388,10 @@ func (c *ContinueStatement) TokenLiteral() string {
 func (c *ContinueStatement) statementNode() {}
 
 type AssignStatement struct {
-	Token *token.Token
+	Token    *token.Token
 	LHS, RHS Expression
 }
+
 func (a *AssignStatement) String() string {
 	buff := &bytes.Buffer{}
 	buff.WriteString(a.LHS.String())
@@ -402,8 +406,8 @@ func (a *AssignStatement) TokenLiteral() string {
 }
 func (a *AssignStatement) statementNode() {}
 
-type ArrayLiteral struct{
-	Token *token.Token
+type ArrayLiteral struct {
+	Token    *token.Token
 	Elements []Expression
 }
 
@@ -421,13 +425,14 @@ func (a *ArrayLiteral) String() string {
 func (a *ArrayLiteral) TokenLiteral() string {
 	return a.Token.Literal
 }
-func(a *ArrayLiteral) expressionNode() {}
+func (a *ArrayLiteral) expressionNode() {}
 
 type IndexOperator struct {
 	Token *token.Token
 	Index Expression
-	Left Expression
+	Left  Expression
 }
+
 func (i *IndexOperator) String() string {
 	buff := &bytes.Buffer{}
 	buff.WriteString(i.Left.String())
@@ -443,8 +448,9 @@ func (i *IndexOperator) expressionNode() {}
 
 type MapLiteral struct {
 	Token *token.Token
-	Kv map[Expression]Expression
+	Kv    map[Expression]Expression
 }
+
 func (m *MapLiteral) String() string {
 	buff := &bytes.Buffer{}
 	buff.WriteString("map")
@@ -462,3 +468,42 @@ func (m *MapLiteral) TokenLiteral() string {
 	return m.Token.Literal
 }
 func (m *MapLiteral) expressionNode() {}
+
+type StructLiteral struct {
+	Token  *token.Token
+	Name   *Ident
+	Fields []*FieldLiteral
+}
+
+func (s *StructLiteral) statementNode() {}
+func (s *StructLiteral) String() string {
+	buff := &bytes.Buffer{}
+	buff.WriteString("struct")
+	buff.WriteString(" ")
+	buff.WriteString(s.Name.String())
+	buff.WriteString(" ")
+	buff.WriteString("{")
+	fields := []string{}
+	for _, f := range s.Fields {
+		fields = append(fields, f.Name)
+	}
+	buff.WriteString(strings.Join(fields, ","))
+	buff.WriteString("}")
+	return buff.String()
+}
+func (s *StructLiteral) TokenLiteral() string {
+	return s.Token.Literal
+}
+
+type FieldLiteral struct {
+	Token *token.Token
+	Name  string
+}
+
+func (f *FieldLiteral) statementNode() {}
+func (f *FieldLiteral) String() string {
+	return f.Name
+}
+func (f *FieldLiteral) TokenLiteral() string {
+	return f.Token.Literal
+}

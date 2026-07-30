@@ -14,6 +14,7 @@ var Keywords = map[string]string{
 	"map":      MAP,
 	"break":    BREAK,
 	"continue": CONTINUE,
+	"struct": STRUCT,
 }
 
 type Token struct {
@@ -37,6 +38,7 @@ const (
 	ASSIGN         = "="
 	PLUS           = "+"
 	COMMA          = ","
+	SEMCOLON	   = ":"
 	LPAREN         = "("
 	RPAREN         = ")"
 	LBRACE         = "{"
@@ -45,6 +47,7 @@ const (
 	RBRACK		   = "]"
 	FUNCTION       = "FUNCTION"
 	VAR            = "VAR"
+	STRUCT 		   = "STRUCT"
 	WHILE          = "WHILE"
 	BREAK          = "BREAK"
 	CONTINUE       = "CONTINUE"

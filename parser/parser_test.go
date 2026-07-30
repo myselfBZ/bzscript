@@ -27,6 +27,37 @@ func TestParseMalformedExpressionVar(t *testing.T) {
 	}
 }
 
+func TestParsingStruct(t *testing.T) {
+	input := "struct Human {name; age; last_name;}"
+	expected := &ast.StructLiteral{Name: &ast.Ident{Value: "Human"}, Fields: []*ast.FieldLiteral{
+		{Name: "name"},
+		{Name: "age"},
+		{Name: "last_name"},
+	}}	
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	if len(p.Errors()) > 0 {
+		t.Fatalf("unexpected error: %v", p.Errors()[0])
+	}
+	s, ok := program.Statements[0].(*ast.StructLiteral)
+	if !ok {
+		t.Fatalf("not a struct literal: %T", program.Statements[0])
+	}
+	if s.Name.Value != expected.Name.Value {
+		t.Fatalf("name did not match: expected %s, got %s", expected.Name, s.Name)
+	}
+	if len(expected.Fields) != len(s.Fields) {
+		t.Fatalf("field did not match: expected %d, got %d", len(expected.Fields), len(s.Fields))
+	}
+	for i, fname := range expected.Fields {
+		if fname.Name != s.Fields[i].Name {
+			t.Fatalf("field name did not match: expected %s, got %s", fname.Name, s.Fields[i].Name)
+		}
+	}
+}
+
+
 func TestParseMalformedIdentVar(t *testing.T) {
 	input := "var 123 = 12123"
 

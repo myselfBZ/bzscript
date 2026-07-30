@@ -119,6 +119,8 @@ func (p *Parser) parse() ast.Statement {
 	case token.IDENT, token.INT, token.FLOAT, token.STRING, token.LPAREN,
 		token.MINUS, token.BANG:
 		return p.parseSimpleStatement()
+	case token.STRUCT:
+		return p.parseStructLiteral()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -438,6 +440,51 @@ func (p *Parser) parseIfStatement() ast.Statement {
 		node.Alternative = alternative
 		return node
 	}
+	return node
+}
+
+func (p *Parser) parseStructLiteral() ast.Statement {
+	node := &ast.StructLiteral{Token: p.curToken, Fields: make([]*ast.FieldLiteral, 0)}
+	if !p.peekTokenIs(token.IDENT) {
+		p.onError(p.expectedError(token.IDENT, p.peekTok.Type))
+		return nil
+	}
+	p.next()
+	node.Name = p.parseIdent().(*ast.Ident)
+	if !p.peekTokenIs(token.LBRACE) {
+		p.onError(p.expectedError(token.LBRACE, p.peekTok.Type))
+		return nil
+	}
+	p.next()
+	if p.peekTokenIs(token.RBRACE) {
+		p.next()
+		return node
+	}
+	if !p.peekTokenIs(token.IDENT) {
+		p.onError(p.expectedError(token.IDENT, p.peekTok.Type))
+		return nil
+	}
+	p.next()
+	firstField := &ast.FieldLiteral{Token: p.curToken, Name: p.curToken.Literal}
+	node.Fields = append(node.Fields, firstField)
+	for p.peekTokenIs(token.SEMCOLON) {
+		p.next()
+		if p.peekTokenIs(token.RBRACE) {
+			break
+		}
+		if !p.peekTokenIs(token.IDENT) {
+			p.onError(p.expectedError(token.IDENT, p.peekTok.Type))
+			return nil
+		}
+		p.next()
+		field := &ast.FieldLiteral{Token: p.curToken, Name: p.curToken.Literal}
+		node.Fields = append(node.Fields, field)
+	}
+	if !p.peekTokenIs(token.RBRACE) {
+		p.onError(p.expectedError(token.RBRACE, p.peekTok.Type))
+		return nil
+	}
+	p.next()
 	return node
 }
 
