@@ -7,6 +7,6 @@ fun makeCounter(start) {
 }
 
 var counter = makeCounter(0)
-print("Count:", counter()) 
-print("Count:", counter()) 
-print("Count:", counter()) 
+print("Count:", counter()) // 1
+print("Count:", counter()) // 2
+print("Count:", counter()) // 3

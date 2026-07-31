@@ -59,7 +59,6 @@ func (l *Lexer) readChar() {
 	l.readPos += 1
 }
 
-
 func (l *Lexer) readDigit() string {
 	position := l.pos
 	for isDigit(l.ch) {
@@ -78,7 +77,6 @@ func (l *Lexer) readNumberToken() token.Token {
 	return token.NewToken(token.FLOAT, intPart + "." + fracPart)
 }
 
-// TODO: handle malformed strings and edge cases
 func (l *Lexer) readString() string {
 	l.readChar()
 	buff := bytes.NewBuffer([]byte{})
@@ -89,11 +87,21 @@ func (l *Lexer) readString() string {
 	return buff.String()
 }
 
+func (l *Lexer) skipComment() {
+	for l.ch != '\n' {
+		l.readChar()
+	}
+	l.readChar()
+} 
+
 func (l *Lexer) NextToken() *token.Token {
 	l.skipWhiteSpace()
+	if l.ch == '/' && l.peek() == '/' {
+		l.skipComment()
+	}
 	var t token.Token
 	switch l.ch {
-	// TODO: comments and logical operators (&&, ||)
+	// TODO: ogical operators (&&, ||)
 	case '"':
 		strContent := l.readString()
 		if l.ch == '"' {
