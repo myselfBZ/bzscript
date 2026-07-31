@@ -18,6 +18,7 @@ var (
 	_ Expression = (*FunctionLiteral)(nil)
 	_ Expression = (*AnonymousFuncLiteral)(nil)
 	_ Expression = (*ArrayLiteral)(nil)
+	_ Expression = (*StructMemberAccess)(nil)
 )
 
 var (
@@ -507,3 +508,19 @@ func (f *FieldLiteral) String() string {
 func (f *FieldLiteral) TokenLiteral() string {
 	return f.Token.Literal
 }
+
+type StructMemberAccess struct {
+ 	Token *token.Token // the . operator
+	Rhs, Lhs Expression
+}
+func (s *StructMemberAccess) String() string {
+	buff := &bytes.Buffer{}
+	buff.WriteString(s.Rhs.String())
+	buff.WriteString(".")
+	buff.WriteString(s.Lhs.String())
+	return buff.String()
+}
+func (s *StructMemberAccess) TokenLiteral() string {
+	return s.Token.Literal
+}
+func (s *StructMemberAccess) expressionNode() {} 
