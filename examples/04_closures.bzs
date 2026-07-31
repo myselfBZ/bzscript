@@ -1,0 +1,12 @@
+fun makeCounter(start) {
+    var count = start
+    return fun () {
+        count = count + 1
+        return count
+    }
+}
+
+var counter = makeCounter(0)
+print("Count:", counter()) 
+print("Count:", counter()) 
+print("Count:", counter()) 

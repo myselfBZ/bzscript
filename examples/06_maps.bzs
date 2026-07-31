@@ -1,0 +1,17 @@
+var inventory = map{
+    "apples": 50,
+    "bananas": 12,
+    "oranges": 0
+}
+
+fun checkStock(item_name) {
+    var item = inventory[item_name]
+    if item.exists {
+        print(item_name, "in stock:", item.value)
+    } else {
+        print(item_name, "is not carried in inventory")
+    }
+}
+
+checkStock("apples")
+checkStock("pineapples")

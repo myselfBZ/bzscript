@@ -1,0 +1,18 @@
+struct BankAccount {
+    owner;
+    balance;
+    is_active;
+}
+
+var account = new(BankAccount)
+account.owner = "someone"
+account.balance = 100
+account.is_active = true
+
+fun deposit(acc, amount) {
+    acc.balance = acc.balance + amount
+    print("Deposited:", amount, "| New Balance:", acc.balance)
+}
+
+print("Account Owner:", account.owner)
+deposit(account, 50)

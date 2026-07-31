@@ -1,0 +1,14 @@
+fun findMax(numbers) {
+    var maxVal = numbers[0]
+    var i = 1
+    while i < len(numbers) {
+        if numbers[i] > maxVal {
+            maxVal = numbers[i]
+        }
+        i = i + 1
+    }
+    return maxVal
+}
+
+var scores = [42, 89, 12, 99, 56]
+print("Highest score is:", findMax(scores))
