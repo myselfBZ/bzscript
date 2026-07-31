@@ -69,8 +69,6 @@ while i < len(shopping_list) {
 
 }
 ```
-
-# Coming soon...
 ```go
 // structures, or grouped data
 struct Human {
@@ -84,6 +82,8 @@ print("Name: ", me.name)
 print("Age: ", me.age)
 print("Social Security: ", me.social_security)
 ```
+
+# Coming soon...
 
 ```js
 // maps
