@@ -77,7 +77,11 @@ struct Human {
     social_security;
 
 }
-var me = Human{name: "myselfBZ", age:19, social_security:"$$%#$$%#"}
+// var me = Huma{name: "myselfBZ", age: 19, social_security: "1235"} this not yet supported
+var me = new(Human)
+me.age = 19
+me.name = "myselfBZ"
+me.social_security = "1235"
 print("Name: ", me.name)
 print("Age: ", me.age)
 print("Social Security: ", me.social_security)
