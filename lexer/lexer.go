@@ -146,6 +146,8 @@ func (l *Lexer) NextToken() *token.Token {
 		}
 	case ',':
 		t = token.NewToken(token.COMMA, string(l.ch))
+	case '.':
+		t = token.NewToken(token.DOT, string(l.ch))
 	case ';':
 		t = token.NewToken(token.SEMCOLON, string(l.ch))
 	case '<':
