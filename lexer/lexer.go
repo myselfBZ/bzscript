@@ -93,9 +93,7 @@ func (l *Lexer) NextToken() *token.Token {
 	l.skipWhiteSpace()
 	var t token.Token
 	switch l.ch {
-	// TODO start of the float
-	// case '.':
-	// ...
+	// TODO: comments and logical operators (&&, ||)
 	case '"':
 		strContent := l.readString()
 		if l.ch == '"' {
