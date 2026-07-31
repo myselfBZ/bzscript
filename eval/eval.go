@@ -73,20 +73,63 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 		return obj
 	case *ast.AssignStatement:
-		ident, ok := node.LHS.(*ast.Ident)
-		if !ok {
+		switch lhs := node.LHS.(type) {
+		case *ast.Ident:
+			_, scope, ok := env.Get(lhs.Value)
+			if !ok {
+				return newError("identifier not found %s", lhs.Value)
+			}
+			rhs := Eval(node.RHS, env)
+			if isError(rhs) {
+				return rhs 
+			}
+			scope.Set(lhs.Value, rhs)
+		case *ast.StructMemberAccess:
+			left := Eval(lhs.Lhs, env)
+			if isError(left) {
+				return left
+			}
+			structInstance, ok := left.(*object.StructInstance)
+			if !ok {
+				return newError("field access on a non-struct object: %s", left.Type())
+			}
+			rhs := lhs.Rhs.(*ast.Ident)
+
+			val := Eval(node.RHS, env)
+			if isError(val) {
+				return val
+			}
+			if _, ok := structInstance.Fields[rhs.Value]; !ok {
+				return newError("field not found on a struct: %s", rhs.Value)
+			}
+			structInstance.Fields[rhs.Value] = val
+		default:
 			return newError("cannot assign to %s, not addressable", node.LHS.TokenLiteral())
+
 		}
-		_, scope, ok := env.Get(ident.Value)
-		if !ok {
-			return newError("identifier not found %s", ident.Value)
-		}
-		rhs := Eval(node.RHS, env)
-		if isError(rhs) {
-			return rhs 
-		}
-		scope.Set(ident.Value, rhs)
 		return Nothing
+	case *ast.StructLiteral:
+		obj := &object.Struct{Fields: make(map[string]bool)}
+		for _, f := range node.Fields {
+			obj.Fields[f.Name] = true
+		}
+		env.Set(node.Name.Value, obj)
+		return Nothing
+	case *ast.StructMemberAccess:
+		left := Eval(node.Lhs, env)
+		if isError(left){
+			return left
+		}
+		s, ok := left.(*object.StructInstance)
+		if !ok {
+			return newError("field access on a non-struct object: %s", left.Type())
+		}
+		fieldName := node.Rhs.(*ast.Ident)
+		val, ok := s.Fields[fieldName.Value]
+		if !ok {
+			return newError("field not found on a struct: %s", fieldName)
+		}
+		return val
 	case *ast.WhileLoop:
 		for {
 			enclosedEnv := object.NewEnclosedEnvironment(env)

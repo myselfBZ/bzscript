@@ -11,17 +11,19 @@ import (
 type ObjType string
 
 const (
-	ARRAY    = "array"
-	INTIGER  = "intiger"
-	FLOAT    = "float"
-	STRING   = "string"
-	BOOL     = "boolean"
-	ERROR    = "error"
-	RETURN   = "return_value"
-	FUNCTION = "function"
-	BUILTIN  = "builtin"
-	BREAK    = "BREAK"
-	CONTINUE = "CONTINUE"
+	ARRAY           = "array"
+	INTIGER         = "intiger"
+	FLOAT           = "float"
+	STRING          = "string"
+	BOOL            = "boolean"
+	ERROR           = "error"
+	RETURN          = "return_value"
+	FUNCTION        = "function"
+	BUILTIN         = "builtin"
+	BREAK           = "BREAK"
+	CONTINUE        = "CONTINUE"
+	STRUCT          = "STRUCT"
+	STRUCT_INSTANCE = "STRUCT_INSTANCE"
 )
 
 func NewEnclosedEnvironment(outer *Environment) *Environment {
@@ -185,6 +187,7 @@ func (b *Break) Inspect() string {
 type Array struct {
 	Elements []Object
 }
+
 func (a *Array) Type() ObjType {
 	return ARRAY
 }
@@ -197,5 +200,43 @@ func (a *Array) Inspect() string {
 	out.WriteString("[")
 	out.WriteString(strings.Join(elements, ", "))
 	out.WriteString("]")
+	return out.String()
+}
+
+type Struct struct {
+	Fields map[string]bool
+}
+
+func (s *Struct) Type() ObjType {
+	return STRUCT
+}
+
+func (s *Struct) Inspect() string {
+	var out bytes.Buffer
+	fields := []string{}
+	for k := range s.Fields {
+		fields = append(fields, k)
+	}
+	out.WriteString("{")
+	out.WriteString(strings.Join(fields, ", "))
+	out.WriteString("}")
+	return out.String()
+}
+
+type StructInstance struct {
+	Fields map[string]Object
+}
+func (s *StructInstance) Type() ObjType {
+	return STRUCT_INSTANCE
+}
+func (s *StructInstance) Inspect() string {
+	var out bytes.Buffer
+	fields := []string{}
+	for k, v := range s.Fields {
+		fields = append(fields, k+": "+v.Inspect())
+	}
+	out.WriteString("{")
+	out.WriteString(strings.Join(fields, ", "))
+	out.WriteString("}")
 	return out.String()
 }

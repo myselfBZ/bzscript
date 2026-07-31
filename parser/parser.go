@@ -19,6 +19,7 @@ const (
 	PREFIX
 	CALL
 	INDEX
+	MEMBER_ACESS
 )
 
 var precedences = map[token.TokenType]Precedence{
@@ -34,7 +35,8 @@ var precedences = map[token.TokenType]Precedence{
 	token.LTOREQ:         COMPARISION,
 	token.EQ:             COMPARISION,
 	token.NOT_EQ:         COMPARISION,
-	token.LBRACK:		  INDEX,
+	token.LBRACK:         INDEX,
+	token.DOT:            MEMBER_ACESS,
 }
 
 type PrefixParseFunc func() ast.Expression
@@ -73,6 +75,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefixFunc(token.MAP, p.parseMap)
 
 	p.registerInfixFunc(token.PLUS, p.parseInfixExpr)
+	p.registerInfixFunc(token.DOT, p.parseStructMemberAcess)
 	p.registerInfixFunc(token.MODULO, p.parseInfixExpr)
 	p.registerInfixFunc(token.MINUS, p.parseInfixExpr)
 	p.registerInfixFunc(token.MULTIPLICATION, p.parseInfixExpr)
@@ -485,6 +488,17 @@ func (p *Parser) parseStructLiteral() ast.Statement {
 		return nil
 	}
 	p.next()
+	return node
+}
+
+func (p *Parser) parseStructMemberAcess(left ast.Expression) ast.Expression {
+	node := &ast.StructMemberAccess{Token: p.curToken, Lhs: left}
+	if !p.peekTokenIs(token.IDENT) {
+		p.onError(fmt.Errorf("expected a field name, got %s", p.peekTok.Literal))
+		return nil
+	}
+	p.next()
+	node.Rhs = p.parseIdent()
 	return node
 }
 

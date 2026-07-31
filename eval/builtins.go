@@ -22,6 +22,9 @@ var builtIns = map[string]*object.BuiltIn{
 	"push":{
 		Fn: PushBuiltin,
 	},
+	"new":{
+		Fn: NewBuiltin,
+	},
 }
 
 
@@ -99,4 +102,22 @@ func PrintBuiltin(objs ...object.Object) object.Object {
 	}
 	fmt.Println()
 	return Nothing
+}
+
+func NewBuiltin(objs ...object.Object) object.Object {
+	if len(objs) != 1 {
+		return newError("new() requires 1 argument, got %d", len(objs))
+	}
+
+	s, ok := objs[0].(*object.Struct)
+	if !ok {
+		return newError("new requires struct type, got %s", objs[0].Type())
+	}
+	inst := &object.StructInstance{
+		Fields: make(map[string]object.Object),
+	}
+	for k := range s.Fields {
+		inst.Fields[k] = Nothing
+	}
+	return inst
 }

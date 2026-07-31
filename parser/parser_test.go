@@ -57,6 +57,56 @@ func TestParsingStruct(t *testing.T) {
 	}
 }
 
+func TestParsingStructMemberAccess(t *testing.T) {
+	input := "human.name"
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+
+	if len(p.Errors()) > 0 {
+		t.Fatalf("unexpected parser errors: %v", p.Errors())
+	}
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain 1 statement. got=%d", len(program.Statements))
+	}
+
+	// Assuming member access is parsed as an ExpressionStatement
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+	}
+
+	memberAccess, ok := stmt.Expression.(*ast.StructMemberAccess)
+	if !ok {
+		t.Fatalf("expression is not *ast.StructMemberAccess. got=%T", stmt.Expression)
+	}
+
+	// Verify Left-Hand Side (Lhs): expected identifier "human"
+	lhs, ok := memberAccess.Lhs.(*ast.Ident)
+	if !ok {
+		t.Fatalf("Lhs is not *ast.Ident. got=%T", memberAccess.Lhs)
+	}
+	if lhs.Value != "human" {
+		t.Errorf("lhs.Value not 'human'. got=%s", lhs.Value)
+	}
+
+	// Verify Right-Hand Side (Rhs): expected identifier "name"
+	rhs, ok := memberAccess.Rhs.(*ast.Ident)
+	if !ok {
+		t.Fatalf("Rhs is not *ast.Ident. got=%T", memberAccess.Rhs)
+	}
+	if rhs.Value != "name" {
+		t.Errorf("rhs.Value not 'name'. got=%s", rhs.Value)
+	}
+
+	// Verify Operator Token
+	if memberAccess.Token.Literal != "." {
+		t.Errorf("memberAccess.Token.Literal not '.'. got=%s", memberAccess.Token.Literal)
+	}
+}
+
 
 func TestParseMalformedIdentVar(t *testing.T) {
 	input := "var 123 = 12123"

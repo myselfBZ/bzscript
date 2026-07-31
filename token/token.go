@@ -68,6 +68,7 @@ const (
 	GTOREQ         = ">="
 	LTOREQ         = "<="
 	COLON 		   = ":"
+	DOT 		   = "."
 	BANG           = "!"
 	STRING         = "STRING"
 )
