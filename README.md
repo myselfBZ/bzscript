@@ -4,11 +4,12 @@ BzScript - a toy programming language designed for beginners to grasp the basics
 
 
 ### How to get up and running
-1. Compile the code
+1. Install Golang >= 1.25.1
+2. Compile the code
 ```sh
 go build -o bin/bzscript ./cmd/bzscript
 ```
-2. Run it with a bzscript file (which should end in .bzs)
+3. Run it with a bzscript file (which should end in .bzs)
 ```sh
 ./bin/bzscript [your_file].bzs
 ```
