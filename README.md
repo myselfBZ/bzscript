@@ -2,6 +2,17 @@
 
 BzScript - a toy programming language designed for beginners to grasp the basics of programming.
 
+
+### How to get up and running
+1. Compile the code
+```sh
+go build -o bin/bzscript ./cmd/bzscript
+```
+2. Run it with a bzscript file (which should end in .bzs)
+```sh
+./bin/bzscript [your_file].bzs
+```
+
 ## Basic syntax
 ```js
 // variable decleration with different types
